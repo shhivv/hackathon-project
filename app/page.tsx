@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { GraduationCap } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 
 export default function LoginPage() {
   const [token, setToken] = useState("")
@@ -59,41 +58,140 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-svh items-center justify-center p-6">
-      <div className="flex w-full max-w-sm flex-col gap-6">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="text-primary h-7 w-7" />
-          <span className="text-lg font-semibold tracking-tight">
-            StudyTracker
-          </span>
-        </div>
-
-        <div>
-          <h1 className="mb-1 text-lg font-medium">Connect to Canvas</h1>
+      <div className="flex w-full max-w-md flex-col gap-8">
+        {/* Header */}
+        <div className="flex flex-col gap-1.5">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Connect to Canvas
+          </h1>
           <p className="text-muted-foreground text-sm">
-            Paste your Canvas access token to get started. You can generate one
-            at{" "}
-            <a
-              href="https://canvas.anu.edu.au/profile/settings"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline"
-            >
-              Canvas Settings
-            </a>
-            .
+            Generate a personal access token from ANU Canvas — it takes about
+            a minute.
           </p>
         </div>
 
+        {/* Step-by-step guide */}
+        <div className="flex flex-col">
+          {/* Step 1 */}
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                1
+              </div>
+              <div className="bg-border mt-2 w-px flex-1" />
+            </div>
+            <div className="flex flex-col gap-1 pb-6">
+              <p className="text-sm font-medium leading-none">
+                Open Canvas Settings
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Visit{" "}
+                <a
+                  href="https://canvas.anu.edu.au/profile/settings"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline underline-offset-2"
+                >
+                  canvas.anu.edu.au/profile/settings
+                </a>{" "}
+                and sign in with your ANU credentials if prompted.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                2
+              </div>
+              <div className="bg-border mt-2 w-px flex-1" />
+            </div>
+            <div className="flex flex-col gap-1 pb-6">
+              <p className="text-sm font-medium leading-none">
+                Find Approved Integrations
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Scroll to the{" "}
+                <span className="text-foreground font-medium">
+                  Approved Integrations
+                </span>{" "}
+                section near the bottom of the page.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                3
+              </div>
+              <div className="bg-border mt-2 w-px flex-1" />
+            </div>
+            <div className="flex flex-col gap-1 pb-6">
+              <p className="text-sm font-medium leading-none">
+                Generate a new token
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Click{" "}
+                <span className="text-foreground font-medium">
+                  + New Access Token
+                </span>
+                , enter a purpose like{" "}
+                <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+                  Study Planner
+                </code>
+                , then click{" "}
+                <span className="text-foreground font-medium">
+                  Generate Token
+                </span>
+                .
+              </p>
+            </div>
+          </div>
+
+          {/* Step 4 — no connector line */}
+          <div className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                4
+              </div>
+            </div>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium leading-none">
+                Copy the token
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Copy the token shown in the dialog — it won&apos;t be
+                displayed again after you close it.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Token input + CTA */}
         <div className="flex flex-col gap-3">
-          <Input
-            type="password"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Canvas access token"
-            onKeyDown={(e) => e.key === "Enter" && token && handleLogin()}
-          />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="token" className="text-sm font-medium">
+              Paste your token
+            </label>
+            <input
+              id="token"
+              type="password"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+              placeholder="canvas_token_…"
+              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              onKeyDown={(e) => e.key === "Enter" && token && handleLogin()}
+            />
+          </div>
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button onClick={handleLogin} disabled={!token || loading}>
+          <Button
+            onClick={handleLogin}
+            disabled={!token || loading}
+            className="w-full"
+          >
             {loading ? "Connecting..." : "Connect"}
           </Button>
         </div>
