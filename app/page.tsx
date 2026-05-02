@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import type { CanvasCourse } from "@/lib/canvas"
 
@@ -118,9 +119,16 @@ export default function Page() {
               Logged in as {user.name}
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout}>
-            Disconnect
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link href="/grades">
+              <Button variant="outline" size="sm">
+                Grade Calculator
+              </Button>
+            </Link>
+            <Button variant="outline" size="sm" onClick={handleLogout}>
+              Disconnect
+            </Button>
+          </div>
         </div>
 
         {courses.length === 0 ? (
