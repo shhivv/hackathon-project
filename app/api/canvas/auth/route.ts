@@ -11,7 +11,7 @@ export async function GET() {
 
   const res = await fetch(
     "https://canvas.anu.edu.au/api/v1/users/self/profile",
-    { headers: { Authorization: `Bearer ${token}` } },
+    { headers: { Authorization: `Bearer ${token}` } }
   )
 
   if (!res.ok) {
@@ -34,14 +34,11 @@ export async function POST(req: NextRequest) {
 
   const res = await fetch(
     "https://canvas.anu.edu.au/api/v1/users/self/profile",
-    { headers: { Authorization: `Bearer ${token}` } },
+    { headers: { Authorization: `Bearer ${token}` } }
   )
 
   if (!res.ok) {
-    return NextResponse.json(
-      { error: "Invalid token" },
-      { status: 401 },
-    )
+    return NextResponse.json({ error: "Invalid token" }, { status: 401 })
   }
 
   const profile = await res.json()

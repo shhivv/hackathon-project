@@ -24,8 +24,8 @@ function AuthGate({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-svh items-center justify-center">
         <div className="flex items-center gap-3">
-          <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-          <p className="text-muted-foreground text-sm">Loading...</p>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     )

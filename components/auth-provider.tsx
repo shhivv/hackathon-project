@@ -33,7 +33,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<{ name: string; avatar_url: string } | null>(
-    null,
+    null
   )
   const [courses, setCourses] = useState<CanvasCourse[]>([])
   const [loading, setLoading] = useState(true)

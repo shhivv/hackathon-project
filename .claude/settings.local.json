@@ -4,7 +4,9 @@
       "Bash(Get-ChildItem *)",
       "Bash(Select-Object FullName)",
       "PowerShell(head *)",
-      "PowerShell(bun run *)"
+      "PowerShell(bun run *)",
+      "Bash(ls *)",
+      "Bash(find \"C:\\\\\\\\Users\\\\\\\\hetpa\\\\\\\\onedrive\\\\\\\\desktop\\\\\\\\hackathon-project\\\\\\\\app\\\\\\\\api\" -type f -name \"*.ts\")"
     ]
   }
 }

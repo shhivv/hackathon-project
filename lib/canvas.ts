@@ -141,7 +141,7 @@ export interface CanvasAnnouncement {
 async function canvasFetch<T>(
   path: string,
   token: string,
-  params?: Record<string, string | string[]>,
+  params?: Record<string, string | string[]>
 ): Promise<T> {
   const url = new URL(`${CANVAS_BASE_URL}${path}`)
   if (params) {
@@ -183,16 +183,16 @@ export function fetchAssignments(token: string, courseId: number) {
       per_page: "50",
       "include[]": ["submission"],
       order_by: "due_at",
-    },
+    }
   )
 }
 
 export async function fetchUserProfile(
-  token: string,
+  token: string
 ): Promise<{ name: string; avatar_url: string }> {
   const profile = await canvasFetch<{ name: string; avatar_url: string }>(
     "/api/v1/users/self/profile",
-    token,
+    token
   )
   return { name: profile.name, avatar_url: profile.avatar_url }
 }
@@ -204,26 +204,30 @@ export function fetchModules(token: string, courseId: number) {
     {
       per_page: "50",
       "include[]": ["items", "content_details"],
-    },
+    }
   )
 }
 
 export function fetchPlannerItems(
   token: string,
   startDate?: string,
-  endDate?: string,
+  endDate?: string
 ) {
   const params: Record<string, string> = { per_page: "50" }
   if (startDate) params.start_date = startDate
   if (endDate) params.end_date = endDate
-  return canvasFetch<CanvasPlannerItem[]>("/api/v1/planner/items", token, params)
+  return canvasFetch<CanvasPlannerItem[]>(
+    "/api/v1/planner/items",
+    token,
+    params
+  )
 }
 
 export function fetchCalendarEvents(
   token: string,
   contextCodes: string[],
   startDate?: string,
-  endDate?: string,
+  endDate?: string
 ) {
   const params: Record<string, string | string[]> = {
     per_page: "50",
@@ -235,14 +239,14 @@ export function fetchCalendarEvents(
   return canvasFetch<CanvasCalendarEvent[]>(
     "/api/v1/calendar_events",
     token,
-    params,
+    params
   )
 }
 
 export function fetchAnnouncements(
   token: string,
   contextCodes: string[],
-  startDate?: string,
+  startDate?: string
 ) {
   const params: Record<string, string | string[]> = {
     per_page: "50",
@@ -253,7 +257,7 @@ export function fetchAnnouncements(
   return canvasFetch<CanvasAnnouncement[]>(
     "/api/v1/announcements",
     token,
-    params,
+    params
   )
 }
 
@@ -264,6 +268,6 @@ export function fetchSubmissions(token: string, courseId: number) {
     {
       per_page: "50",
       "student_ids[]": ["self"],
-    },
+    }
   )
 }

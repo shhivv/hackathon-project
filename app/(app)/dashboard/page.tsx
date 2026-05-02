@@ -56,7 +56,7 @@ export default function DashboardPage() {
           weekday: "long",
           month: "short",
           day: "numeric",
-        }),
+        })
       )
       setTomorrowClasses(getEntriesForDay(timetable, dayName))
     }
@@ -90,7 +90,7 @@ export default function DashboardPage() {
     (a) =>
       a.progress < 100 &&
       (calculatePriority(a.dueAt) === "critical" ||
-        calculatePriority(a.dueAt) === "high"),
+        calculatePriority(a.dueAt) === "high")
   )
   const completedCount = assignments.filter((a) => a.progress >= 100).length
   const overallProgress =
@@ -104,7 +104,7 @@ export default function DashboardPage() {
         <h1 className="text-lg font-semibold">
           Welcome back{user?.name ? `, ${user.name}` : ""}
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Here&apos;s your study overview
         </p>
       </div>
@@ -113,12 +113,12 @@ export default function DashboardPage() {
       <div className="mb-6 rounded-xl border p-5">
         <div className="mb-3 flex items-center justify-between">
           <span className="text-sm font-medium">Overall Progress</span>
-          <span className="text-muted-foreground text-sm tabular-nums">
+          <span className="text-sm text-muted-foreground tabular-nums">
             {completedCount}/{assignments.length} assignments
           </span>
         </div>
         <Progress value={overallProgress} className="mb-2 h-3" />
-        <p className="text-muted-foreground text-xs">
+        <p className="text-xs text-muted-foreground">
           {overallProgress}% complete
         </p>
       </div>
@@ -139,14 +139,14 @@ export default function DashboardPage() {
                   key={a.id}
                   className={cn(
                     "flex items-center justify-between rounded-lg border p-3",
-                    config.border,
+                    config.border
                   )}
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{a.title}</p>
                     <div className="flex items-center gap-2">
                       {a.courseName && (
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-xs text-muted-foreground">
                           {a.courseCode || a.courseName}
                         </span>
                       )}
@@ -157,7 +157,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="ml-3 flex items-center gap-2">
                     <Progress value={a.progress} className="h-1.5 w-16" />
-                    <span className="text-muted-foreground text-xs tabular-nums">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       {a.progress}%
                     </span>
                   </div>
@@ -178,8 +178,10 @@ export default function DashboardPage() {
       {tomorrowClasses.length > 0 && (
         <div className="mb-6">
           <div className="mb-3 flex items-center gap-2">
-            <Calendar className="text-primary h-4 w-4" />
-            <h2 className="text-sm font-medium">Tomorrow &mdash; {tomorrowLabel}</h2>
+            <Calendar className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-medium">
+              Tomorrow &mdash; {tomorrowLabel}
+            </h2>
           </div>
           <div className="flex flex-col gap-2">
             {tomorrowClasses.map((entry, i) => {
@@ -189,7 +191,7 @@ export default function DashboardPage() {
                   key={i}
                   className={cn(
                     "rounded-lg border p-3",
-                    needsPrep && "border-amber-500/40 bg-amber-500/5",
+                    needsPrep && "border-amber-500/40 bg-amber-500/5"
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -197,12 +199,12 @@ export default function DashboardPage() {
                       <p className="text-sm font-medium">
                         {getSubjectShortName(entry.description)}
                       </p>
-                      <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {entry.time} &middot; {entry.duration}
                         </span>
-                        <span className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
+                        <span className="rounded bg-muted px-1.5 py-0.5 text-xs font-medium">
                           {getActivityLabel(entry.group)}
                         </span>
                         {entry.location && entry.location !== "-" && (
@@ -230,8 +232,8 @@ export default function DashboardPage() {
 
       {loadingAssignments && (
         <div className="mb-6 flex items-center gap-2">
-          <Loader2 className="text-muted-foreground h-3.5 w-3.5 animate-spin" />
-          <span className="text-muted-foreground text-xs">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+          <span className="text-xs text-muted-foreground">
             Loading assignments...
           </span>
         </div>
@@ -240,42 +242,46 @@ export default function DashboardPage() {
       {/* Courses */}
       <div>
         <div className="mb-3 flex items-center gap-2">
-          <BookOpen className="text-primary h-4 w-4" />
+          <BookOpen className="h-4 w-4 text-primary" />
           <h2 className="text-sm font-medium">
             Your Courses ({activeCourses.length})
           </h2>
         </div>
         {activeCourses.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No active courses.</p>
+          <p className="text-sm text-muted-foreground">No active courses.</p>
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
             {activeCourses.map((course) => {
               const courseAssignments = assignments.filter(
-                (a) => a.courseId === course.id,
+                (a) => a.courseId === course.id
               )
               const done = courseAssignments.filter(
-                (a) => a.progress >= 100,
+                (a) => a.progress >= 100
               ).length
               return (
-                <div key={course.id} className="rounded-xl border p-4">
+                <Link
+                  key={course.id}
+                  href={`/courses/${course.id}`}
+                  className="rounded-xl border p-4 transition-colors hover:bg-muted/50"
+                >
                   <p className="mb-1 text-sm font-medium">{course.name}</p>
-                  <p className="text-muted-foreground text-xs">
+                  <p className="text-xs text-muted-foreground">
                     {course.course_code}
                   </p>
                   {courseAssignments.length > 0 && (
                     <div className="mt-2 flex items-center gap-2">
-                      <ClipboardList className="text-muted-foreground h-3 w-3" />
-                      <span className="text-muted-foreground text-xs">
+                      <ClipboardList className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
                         {done}/{courseAssignments.length} done
                       </span>
                     </div>
                   )}
                   {course.term && (
-                    <p className="text-muted-foreground mt-1 text-xs">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {course.term.name}
                     </p>
                   )}
-                </div>
+                </Link>
               )
             })}
           </div>

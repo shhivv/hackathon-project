@@ -49,7 +49,7 @@ const DAY_MAP: Record<string, number> = {
 
 export function getEntriesForDay(
   entries: TimetableEntry[],
-  dayName: string,
+  dayName: string
 ): TimetableEntry[] {
   return entries
     .filter((e) => e.day === dayName)

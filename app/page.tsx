@@ -50,8 +50,8 @@ export default function LoginPage() {
     return (
       <div className="flex min-h-svh items-center justify-center p-6">
         <div className="flex items-center gap-3">
-          <div className="border-primary h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
-          <p className="text-muted-foreground text-sm">Loading...</p>
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
     )
@@ -65,9 +65,9 @@ export default function LoginPage() {
           <h1 className="text-2xl font-semibold tracking-tight">
             Connect to Canvas
           </h1>
-          <p className="text-muted-foreground text-sm">
-            Generate a personal access token from ANU Canvas — it takes about
-            a minute.
+          <p className="text-sm text-muted-foreground">
+            Generate a personal access token from ANU Canvas — it takes about a
+            minute.
           </p>
         </div>
 
@@ -76,16 +76,16 @@ export default function LoginPage() {
           {/* Step 1 */}
           <div className="flex gap-4">
             <div className="flex flex-col items-center">
-              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 1
               </div>
-              <div className="bg-border mt-2 w-px flex-1" />
+              <div className="mt-2 w-px flex-1 bg-border" />
             </div>
             <div className="flex flex-col gap-1 pb-6">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm leading-none font-medium">
                 Open Canvas Settings
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 Visit{" "}
                 <a
                   href="https://canvas.anu.edu.au/profile/settings"
@@ -103,18 +103,18 @@ export default function LoginPage() {
           {/* Step 2 */}
           <div className="flex gap-4">
             <div className="flex flex-col items-center">
-              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 2
               </div>
-              <div className="bg-border mt-2 w-px flex-1" />
+              <div className="mt-2 w-px flex-1 bg-border" />
             </div>
             <div className="flex flex-col gap-1 pb-6">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm leading-none font-medium">
                 Find Approved Integrations
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 Scroll to the{" "}
-                <span className="text-foreground font-medium">
+                <span className="font-medium text-foreground">
                   Approved Integrations
                 </span>{" "}
                 section near the bottom of the page.
@@ -125,26 +125,26 @@ export default function LoginPage() {
           {/* Step 3 */}
           <div className="flex gap-4">
             <div className="flex flex-col items-center">
-              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 3
               </div>
-              <div className="bg-border mt-2 w-px flex-1" />
+              <div className="mt-2 w-px flex-1 bg-border" />
             </div>
             <div className="flex flex-col gap-1 pb-6">
-              <p className="text-sm font-medium leading-none">
+              <p className="text-sm leading-none font-medium">
                 Generate a new token
               </p>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-sm text-muted-foreground">
                 Click{" "}
-                <span className="text-foreground font-medium">
+                <span className="font-medium text-foreground">
                   + New Access Token
                 </span>
                 , enter a purpose like{" "}
-                <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">
+                <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
                   Study Planner
                 </code>
                 , then click{" "}
-                <span className="text-foreground font-medium">
+                <span className="font-medium text-foreground">
                   Generate Token
                 </span>
                 .
@@ -155,17 +155,15 @@ export default function LoginPage() {
           {/* Step 4 — no connector line */}
           <div className="flex gap-4">
             <div className="flex flex-col items-center">
-              <div className="bg-primary text-primary-foreground flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 4
               </div>
             </div>
             <div className="flex flex-col gap-1">
-              <p className="text-sm font-medium leading-none">
-                Copy the token
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Copy the token shown in the dialog — it won&apos;t be
-                displayed again after you close it.
+              <p className="text-sm leading-none font-medium">Copy the token</p>
+              <p className="text-sm text-muted-foreground">
+                Copy the token shown in the dialog — it won&apos;t be displayed
+                again after you close it.
               </p>
             </div>
           </div>
@@ -183,7 +181,7 @@ export default function LoginPage() {
               value={token}
               onChange={(e) => setToken(e.target.value)}
               placeholder="canvas_token_…"
-              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring rounded-md border px-3 py-2 font-mono text-sm outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+              className="rounded-md border border-input bg-background px-3 py-2 font-mono text-sm ring-offset-background outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               onKeyDown={(e) => e.key === "Enter" && token && handleLogin()}
             />
           </div>

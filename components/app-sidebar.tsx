@@ -26,9 +26,9 @@ export function AppSidebar() {
   const { user, courses, logout } = useAuth()
 
   return (
-    <aside className="bg-card border-border flex h-svh w-64 shrink-0 flex-col border-r">
+    <aside className="flex h-svh w-64 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex items-center gap-2 px-4 pt-5 pb-4">
-        <GraduationCap className="text-primary h-6 w-6" />
+        <GraduationCap className="h-6 w-6 text-primary" />
         <span className="text-sm font-semibold tracking-tight">
           StudyTracker
         </span>
@@ -47,7 +47,7 @@ export function AppSidebar() {
                 "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 active
                   ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
             >
               <item.icon className="h-4 w-4" />
@@ -61,23 +61,31 @@ export function AppSidebar() {
 
       <div className="px-3 pt-3">
         <div className="flex items-center justify-between px-3 pb-2">
-          <span className="text-muted-foreground text-xs font-medium uppercase tracking-wider">
+          <span className="text-xs font-medium tracking-wider text-muted-foreground uppercase">
             Courses
           </span>
-          <span className="text-muted-foreground text-xs">{courses.length}</span>
+          <span className="text-xs text-muted-foreground">
+            {courses.length}
+          </span>
         </div>
         <ScrollArea className="h-48">
           <div className="flex flex-col gap-0.5">
             {courses
               .filter((c) => c.workflow_state === "available")
               .map((course) => (
-                <div
+                <Link
                   key={course.id}
-                  className="text-muted-foreground truncate rounded px-3 py-1.5 text-xs"
+                  href={`/courses/${course.id}`}
+                  className={cn(
+                    "truncate rounded px-3 py-1.5 text-xs transition-colors",
+                    pathname === `/courses/${course.id}`
+                      ? "bg-primary/10 font-medium text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
                   title={course.name}
                 >
                   {course.course_code}
-                </div>
+                </Link>
               ))}
           </div>
         </ScrollArea>
@@ -87,7 +95,7 @@ export function AppSidebar() {
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground mb-1 w-full justify-start gap-2 text-xs"
+          className="mb-1 w-full justify-start gap-2 text-xs text-muted-foreground"
           onClick={() => requestNotificationPermission()}
         >
           <Bell className="h-3.5 w-3.5" />
@@ -95,7 +103,7 @@ export function AppSidebar() {
         </Button>
         <Separator className="mb-2" />
         <div className="flex items-center justify-between px-2">
-          <span className="text-muted-foreground truncate text-xs">
+          <span className="truncate text-xs text-muted-foreground">
             {user?.name ?? "User"}
           </span>
           <Button

@@ -13,7 +13,7 @@ export async function GET() {
   try {
     const courses = await fetchCourses(token)
     const activeCourses = courses.filter(
-      (c) => c.workflow_state === "available",
+      (c) => c.workflow_state === "available"
     )
 
     const results = await Promise.all(
@@ -24,7 +24,7 @@ export async function GET() {
           course_name: course.name,
           course_code: course.course_code,
         }))
-      }),
+      })
     )
 
     return NextResponse.json(results.flat())

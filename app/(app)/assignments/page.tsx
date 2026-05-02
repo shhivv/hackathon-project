@@ -73,18 +73,14 @@ export default function AssignmentsPage() {
 
   function handleProgressChange(id: string, progress: number) {
     setAssignments((prev) =>
-      sortByPriority(
-        prev.map((a) => (a.id === id ? { ...a, progress } : a)),
-      ),
+      sortByPriority(prev.map((a) => (a.id === id ? { ...a, progress } : a)))
     )
 
     if (id.startsWith("canvas-")) {
       setProgressOverride(id, progress)
     } else {
       const custom = getCustomAssignments()
-      const updated = custom.map((a) =>
-        a.id === id ? { ...a, progress } : a,
-      )
+      const updated = custom.map((a) => (a.id === id ? { ...a, progress } : a))
       saveCustomAssignments(updated)
     }
   }
@@ -118,10 +114,10 @@ export default function AssignmentsPage() {
   const stats = {
     total: assignments.length,
     overdue: assignments.filter(
-      (a) => calculatePriority(a.dueAt) === "critical" && a.progress < 100,
+      (a) => calculatePriority(a.dueAt) === "critical" && a.progress < 100
     ).length,
     dueSoon: assignments.filter(
-      (a) => calculatePriority(a.dueAt) === "high" && a.progress < 100,
+      (a) => calculatePriority(a.dueAt) === "high" && a.progress < 100
     ).length,
     completed: assignments.filter((a) => a.progress >= 100).length,
   }
@@ -130,8 +126,8 @@ export default function AssignmentsPage() {
     return (
       <div className="flex min-h-svh items-center justify-center">
         <div className="flex items-center gap-3">
-          <Loader2 className="text-primary h-4 w-4 animate-spin" />
-          <p className="text-muted-foreground text-sm">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">
             Loading assignments...
           </p>
         </div>
@@ -145,7 +141,7 @@ export default function AssignmentsPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-lg font-semibold">Assignment Tracker</h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Track deadlines and progress across all your courses
           </p>
         </div>
@@ -209,11 +205,9 @@ export default function AssignmentsPage() {
       {/* Assignment list */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-12">
-          <ClipboardList className="text-muted-foreground mb-3 h-8 w-8" />
-          <p className="text-muted-foreground text-sm">
-            {tab === "all"
-              ? "No assignments yet"
-              : `No ${tab} assignments`}
+          <ClipboardList className="mb-3 h-8 w-8 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
+            {tab === "all" ? "No assignments yet" : `No ${tab} assignments`}
           </p>
         </div>
       ) : (

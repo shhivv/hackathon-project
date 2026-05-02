@@ -133,7 +133,10 @@ export function saveCustomAssignments(assignments: TrackedAssignment[]) {
 }
 
 export function addCustomAssignment(
-  assignment: Omit<TrackedAssignment, "id" | "isCanvas" | "createdAt" | "progress">,
+  assignment: Omit<
+    TrackedAssignment,
+    "id" | "isCanvas" | "createdAt" | "progress"
+  >
 ): TrackedAssignment {
   const custom = getCustomAssignments()
   const newAssignment: TrackedAssignment = {
@@ -154,7 +157,7 @@ export function deleteCustomAssignment(id: string) {
 }
 
 export function canvasToTracked(
-  assignment: CanvasAssignment & { course_name?: string; course_code?: string },
+  assignment: CanvasAssignment & { course_name?: string; course_code?: string }
 ): TrackedAssignment {
   const overrides = getProgressOverrides()
   const submitted =
@@ -180,7 +183,9 @@ export function canvasToTracked(
   }
 }
 
-export function sortByPriority(assignments: TrackedAssignment[]): TrackedAssignment[] {
+export function sortByPriority(
+  assignments: TrackedAssignment[]
+): TrackedAssignment[] {
   const order: Record<Priority, number> = {
     critical: 0,
     high: 1,
@@ -194,7 +199,8 @@ export function sortByPriority(assignments: TrackedAssignment[]): TrackedAssignm
     const pa = order[calculatePriority(a.dueAt)]
     const pb = order[calculatePriority(b.dueAt)]
     if (pa !== pb) return pa - pb
-    if (a.dueAt && b.dueAt) return new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime()
+    if (a.dueAt && b.dueAt)
+      return new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime()
     if (a.dueAt) return -1
     if (b.dueAt) return 1
     return 0
@@ -216,7 +222,7 @@ export function checkDueReminders(assignments: TrackedAssignment[]) {
 
   const REMINDED_KEY = "assignment-reminded"
   const reminded: string[] = JSON.parse(
-    localStorage.getItem(REMINDED_KEY) || "[]",
+    localStorage.getItem(REMINDED_KEY) || "[]"
   )
 
   const newReminders: string[] = []
@@ -226,11 +232,13 @@ export function checkDueReminders(assignments: TrackedAssignment[]) {
     const priority = calculatePriority(a.dueAt)
     if (priority === "critical" || priority === "high") {
       new Notification(
-        priority === "critical" ? "Assignment Overdue!" : "Assignment Due Soon!",
+        priority === "critical"
+          ? "Assignment Overdue!"
+          : "Assignment Due Soon!",
         {
           body: `${a.title}${a.courseName ? ` — ${a.courseName}` : ""}\n${formatDueDate(a.dueAt)}`,
           icon: "/favicon.ico",
-        },
+        }
       )
       newReminders.push(a.id)
     }
@@ -239,7 +247,7 @@ export function checkDueReminders(assignments: TrackedAssignment[]) {
   if (newReminders.length > 0) {
     localStorage.setItem(
       REMINDED_KEY,
-      JSON.stringify([...reminded, ...newReminders]),
+      JSON.stringify([...reminded, ...newReminders])
     )
   }
 }

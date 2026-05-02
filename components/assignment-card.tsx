@@ -49,44 +49,39 @@ export function AssignmentCard({
     <div
       className={cn(
         "rounded-xl border p-4 transition-all",
-        isComplete
-          ? "border-border bg-muted/30 opacity-70"
-          : config.border,
+        isComplete ? "border-border bg-muted/30 opacity-70" : config.border
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-center gap-2">
             {assignment.courseName && (
-              <span className="bg-primary/10 text-primary truncate rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+              <span className="truncate rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-primary uppercase">
                 {assignment.courseCode || assignment.courseName}
               </span>
             )}
             {!assignment.isCanvas && (
-              <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px] font-medium">
+              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                 Custom
               </span>
             )}
           </div>
 
           <h3
-            className={cn(
-              "text-sm font-medium",
-              isComplete && "line-through",
-            )}
+            className={cn("text-sm font-medium", isComplete && "line-through")}
           >
             {assignment.title}
           </h3>
 
           <div className="mt-1 flex items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <Clock className="text-muted-foreground h-3 w-3" />
+              <Clock className="h-3 w-3 text-muted-foreground" />
               <span
                 className={cn(
                   "text-xs",
                   priority === "critical"
                     ? "font-medium text-red-500"
-                    : "text-muted-foreground",
+                    : "text-muted-foreground"
                 )}
               >
                 {formatDueDate(assignment.dueAt)}
@@ -99,7 +94,7 @@ export function AssignmentCard({
               </span>
             </div>
             {assignment.pointsPossible && (
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 {assignment.pointsPossible} pts
               </span>
             )}
@@ -145,10 +140,7 @@ export function AssignmentCard({
 
       {/* Progress bar */}
       <div className="mt-3 flex items-center gap-3">
-        <Progress
-          value={assignment.progress}
-          className="h-2 flex-1"
-        />
+        <Progress value={assignment.progress} className="h-2 flex-1" />
         <div className="flex items-center gap-1">
           {isComplete ? (
             <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
@@ -156,7 +148,7 @@ export function AssignmentCard({
           <span
             className={cn(
               "text-xs font-medium tabular-nums",
-              isComplete ? "text-green-500" : "text-muted-foreground",
+              isComplete ? "text-green-500" : "text-muted-foreground"
             )}
           >
             {assignment.progress}%
@@ -168,21 +160,21 @@ export function AssignmentCard({
       {expanded && (
         <div className="mt-3 border-t pt-3">
           {assignment.description && (
-            <p className="text-muted-foreground mb-3 text-xs leading-relaxed">
+            <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
               {assignment.description.replace(/<[^>]*>/g, "").slice(0, 200)}
               {(assignment.description.length ?? 0) > 200 ? "..." : ""}
             </p>
           )}
 
           {assignment.dueAt && (
-            <p className="text-muted-foreground mb-3 text-xs">
+            <p className="mb-3 text-xs text-muted-foreground">
               {formatFullDate(assignment.dueAt)}
             </p>
           )}
 
           {!assignment.submitted && (
             <div className="flex flex-col gap-2">
-              <span className="text-muted-foreground text-xs">
+              <span className="text-xs text-muted-foreground">
                 Set progress:
               </span>
               <div className="flex gap-1.5">

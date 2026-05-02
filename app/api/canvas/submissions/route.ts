@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   if (!courseId) {
     return NextResponse.json(
       { error: "course_id is required" },
-      { status: 400 },
+      { status: 400 }
     )
   }
 

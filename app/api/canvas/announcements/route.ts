@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   if (contextCodes.length === 0) {
     return NextResponse.json(
       { error: "context_codes[] is required" },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const announcements = await fetchAnnouncements(
       token,
       contextCodes,
-      startDate,
+      startDate
     )
     return NextResponse.json(announcements)
   } catch (e) {

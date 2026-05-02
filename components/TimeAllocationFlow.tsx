@@ -29,7 +29,7 @@ function Shell({
     <div className="flex min-h-svh items-center justify-center p-6">
       <div
         key={fadeKey}
-        className="animate-in fade-in flex w-full max-w-sm flex-col gap-6 duration-200"
+        className="flex w-full max-w-sm animate-in flex-col gap-6 duration-200 fade-in"
       >
         {children}
       </div>
@@ -48,13 +48,13 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
 
   // Step 1 state
   const [hasJob, setHasJob] = useState<boolean | null>(() =>
-    initialData != null ? initialData.job !== null : null,
+    initialData != null ? initialData.job !== null : null
   )
   const [jobTitle, setJobTitle] = useState(initialData?.job?.title ?? "")
   const [jobHours, setJobHours] = useState(
     initialData?.job?.hoursPerWeek != null
       ? String(initialData.job.hoursPerWeek)
-      : "",
+      : ""
   )
   const [jobTitleError, setJobTitleError] = useState("")
   const [jobHoursError, setJobHoursError] = useState("")
@@ -63,7 +63,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
   const [recHours, setRecHours] = useState(
     initialData?.recreationHoursPerWeek != null
       ? String(initialData.recreationHoursPerWeek)
-      : "",
+      : ""
   )
   const [recHoursError, setRecHoursError] = useState("")
 
@@ -113,7 +113,9 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
 
     const hrs = Number(jobHours)
     if (jobHours === "" || hrs < 0) {
-      setJobHoursError(hrs < 0 ? "Hours can't be negative." : "Enter the hours.")
+      setJobHoursError(
+        hrs < 0 ? "Hours can't be negative." : "Enter the hours."
+      )
       ok = false
     }
 
@@ -159,7 +161,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     const entries = parseTimetable(timetableText)
     if (entries.length === 0) {
       setTimetableError(
-        "No entries found. Paste the full table including all columns, separated by tabs.",
+        "No entries found. Paste the full table including all columns, separated by tabs."
       )
       return
     }
@@ -195,13 +197,13 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     return (
       <Shell fadeKey={fadeKey}>
         <div className="flex flex-col gap-2">
-          <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">
+          <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
             3 of 3
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">
             Your timetable
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Export your timetable from{" "}
             <a
               href="https://mytimetable.anu.edu.au/even/student"
@@ -210,8 +212,9 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
               className="text-foreground underline underline-offset-2"
             >
               mytimetable.anu.edu.au/even/student
-            </a>
-            {" "}— click <strong>Export</strong> then choose <strong>Export as text</strong>, then paste it below.
+            </a>{" "}
+            — click <strong>Export</strong> then choose{" "}
+            <strong>Export as text</strong>, then paste it below.
           </p>
         </div>
 
@@ -232,16 +235,16 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
                 placeholder="Subject Code&#9;Description&#9;Group&#9;Activity&#9;Day&#9;Time&#9;..."
                 rows={6}
                 className={cn(
-                  "border-input bg-background placeholder:text-muted-foreground flex w-full rounded-md border px-3 py-2 text-sm",
-                  "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-1",
+                  "flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground",
+                  "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1",
                   "resize-y font-mono text-xs leading-relaxed",
-                  timetableError && "border-destructive",
+                  timetableError && "border-destructive"
                 )}
               />
               {timetableError && (
-                <p className="text-destructive text-xs">{timetableError}</p>
+                <p className="text-xs text-destructive">{timetableError}</p>
               )}
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 Tab-separated rows — include the header row or just the data.
               </p>
             </div>
@@ -256,7 +259,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
               </Button>
               <button
                 onClick={handleTimetableSkip}
-                className="text-muted-foreground text-sm underline underline-offset-2"
+                className="text-sm text-muted-foreground underline underline-offset-2"
               >
                 Skip
               </button>
@@ -264,7 +267,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           </>
         ) : (
           <>
-            <div className="bg-muted flex max-h-64 flex-col gap-1 overflow-y-auto rounded-lg p-3">
+            <div className="flex max-h-64 flex-col gap-1 overflow-y-auto rounded-lg bg-muted p-3">
               {parsedEntries.map((entry, i) => (
                 <div
                   key={i}
@@ -274,12 +277,12 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
                     <p className="truncate text-sm font-medium">
                       {getSubjectShortName(entry.description)}
                     </p>
-                    <p className="text-muted-foreground text-xs">
+                    <p className="text-xs text-muted-foreground">
                       {getActivityLabel(entry.group)} &middot; {entry.day}{" "}
                       {entry.time} &middot; {entry.duration}
                     </p>
                   </div>
-                  <span className="text-muted-foreground shrink-0 text-xs">
+                  <span className="shrink-0 text-xs text-muted-foreground">
                     {entry.location && entry.location !== "-"
                       ? entry.location.split("_")[0]
                       : ""}
@@ -288,7 +291,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
               ))}
             </div>
 
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               {parsedEntries.length} classes found.
             </p>
 
@@ -301,7 +304,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
                   setParsedEntries([])
                   setTimetableText("")
                 }}
-                className="text-muted-foreground text-sm underline underline-offset-2"
+                className="text-sm text-muted-foreground underline underline-offset-2"
               >
                 Re-paste
               </button>
@@ -321,7 +324,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           You&apos;re set.
         </h1>
 
-        <div className="bg-muted flex flex-col gap-2 rounded-lg p-4">
+        <div className="flex flex-col gap-2 rounded-lg bg-muted p-4">
           <p className="text-sm">
             <span className="text-muted-foreground">Job: </span>
             {savedData.job
@@ -340,7 +343,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           </Button>
           <button
             onClick={() => advance(1)}
-            className="text-muted-foreground text-sm underline underline-offset-2"
+            className="text-sm text-muted-foreground underline underline-offset-2"
           >
             Edit
           </button>
@@ -355,16 +358,16 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     return (
       <Shell fadeKey={fadeKey}>
         <div className="flex flex-col gap-2">
-          <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">
+          <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
             2 of 3
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">
             Time for recreation
           </h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-sm text-muted-foreground">
             Block out time for the things that keep you well — sport, hobbies,
-            friends, rest. No need to break it down. This is time we&apos;ll
-            try not to let study or work eat into.
+            friends, rest. No need to break it down. This is time we&apos;ll try
+            not to let study or work eat into.
           </p>
         </div>
 
@@ -392,13 +395,13 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
             aria-invalid={!!recHoursError || undefined}
           />
           {recHoursError ? (
-            <p className="text-destructive text-xs">{recHoursError}</p>
+            <p className="text-xs text-destructive">{recHoursError}</p>
           ) : recHoursWarning ? (
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               That&apos;s a lot — are you sure?
             </p>
           ) : (
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
               A typical student protects 5–10 hours, but it&apos;s your call.
             </p>
           )}
@@ -414,7 +417,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           </Button>
           <button
             onClick={() => advance(1)}
-            className="text-muted-foreground text-sm underline underline-offset-2"
+            className="text-sm text-muted-foreground underline underline-offset-2"
           >
             Back
           </button>
@@ -428,13 +431,13 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
   return (
     <Shell fadeKey={fadeKey}>
       <div className="flex flex-col gap-2">
-        <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">
+        <p className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
           1 of 3
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">
           Do you have a job?
         </h1>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           If you work part-time or casually, tell us roughly how much.
           We&apos;ll factor it into your weekly plan.
         </p>
@@ -448,7 +451,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
             "rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
             hasJob === true
               ? "border-primary bg-primary text-primary-foreground"
-              : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+              : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
           )}
         >
           Yes, I work
@@ -459,7 +462,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
             "rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
             hasJob === false
               ? "border-primary bg-primary text-primary-foreground"
-              : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+              : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
           )}
         >
           Not right now
@@ -488,7 +491,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
               aria-invalid={!!jobTitleError || undefined}
             />
             {jobTitleError && (
-              <p className="text-destructive text-xs">{jobTitleError}</p>
+              <p className="text-xs text-destructive">{jobTitleError}</p>
             )}
           </div>
 
@@ -513,13 +516,13 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
               aria-invalid={!!jobHoursError || undefined}
             />
             {jobHoursError ? (
-              <p className="text-destructive text-xs">{jobHoursError}</p>
+              <p className="text-xs text-destructive">{jobHoursError}</p>
             ) : jobHoursWarning ? (
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 That&apos;s a lot — are you sure?
               </p>
             ) : (
-              <p className="text-muted-foreground text-xs">
+              <p className="text-xs text-muted-foreground">
                 An average is fine — it doesn&apos;t have to be exact.
               </p>
             )}
