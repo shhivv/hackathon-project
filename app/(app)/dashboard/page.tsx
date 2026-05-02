@@ -14,9 +14,12 @@ import {
   Wrench,
   Info,
   Check,
+  Sparkles,
+  Flame,
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
 import {
   type TrackedAssignment,
@@ -33,6 +36,19 @@ import {
 } from "@/lib/assignments"
 import type { CanvasAssignment } from "@/lib/canvas"
 import { cn } from "@/lib/utils"
+import {
+  type AuraData,
+  getAuraData,
+  getTodayStudyHours,
+  addStudySession,
+  completeAssignment,
+  uncompleteAssignment,
+  getTotalPoints,
+  getRank,
+  getNextRank,
+  getProgressToNextRank,
+  RANK_STYLES,
+} from "@/lib/auraStore"
 import { YourWeekPanel } from "@/components/YourWeekPanel"
 import { SuggestedSchedule } from "@/components/SuggestedSchedule"
 import { getTimetable } from "@/lib/timetableStore"
@@ -53,6 +69,9 @@ export default function DashboardPage() {
   const [nextClassDateKey, setNextClassDateKey] = useState("")
   const [skippedIndices, setSkippedIndices] = useState<Set<number>>(new Set())
   const [expandedReason, setExpandedReason] = useState<string | null>(null)
+  const [planaura, setPlanaura] = useState<AuraData | null>(null)
+  const [studyHoursInput, setStudyHoursInput] = useState("")
+  const [todayStudyHours, setTodayStudyHours] = useState(0)
 
   useEffect(() => {
     const timetable = getTimetable()
@@ -91,6 +110,11 @@ export default function DashboardPage() {
   }, [])
 
   useEffect(() => {
+    setPlanaura(getAuraData())
+    setTodayStudyHours(getTodayStudyHours())
+  }, [])
+
+  useEffect(() => {
     async function load() {
       try {
         const res = await fetch("/api/canvas/assignments")
@@ -103,9 +127,15 @@ export default function DashboardPage() {
           canvas = data.map(canvasToTracked)
         }
         const custom = getCustomAssignments()
-        setAssignments(sortByPriority([...canvas, ...custom]))
+        const all = sortByPriority([...canvas, ...custom])
+        setAssignments(all)
+        all.filter((a) => a.progress >= 100).forEach((a) => completeAssignment(a.id, a.title))
+        setPlanaura(getAuraData())
       } catch {
-        setAssignments(sortByPriority(getCustomAssignments()))
+        const fallback = sortByPriority(getCustomAssignments())
+        setAssignments(fallback)
+        fallback.filter((a) => a.progress >= 100).forEach((a) => completeAssignment(a.id, a.title))
+        setPlanaura(getAuraData())
       } finally {
         setLoadingAssignments(false)
       }
@@ -114,6 +144,7 @@ export default function DashboardPage() {
   }, [])
 
   function handleProgressChange(id: string, progress: number) {
+    const assignment = assignments.find((a) => a.id === id)
     setAssignments((prev) =>
       sortByPriority(prev.map((a) => (a.id === id ? { ...a, progress } : a)))
     )
@@ -125,6 +156,22 @@ export default function DashboardPage() {
         custom.map((a) => (a.id === id ? { ...a, progress } : a))
       )
     }
+    if (progress >= 100 && assignment) {
+      completeAssignment(id, assignment.title)
+      setPlanaura(getAuraData())
+    } else if (progress < 100) {
+      uncompleteAssignment(id)
+      setPlanaura(getAuraData())
+    }
+  }
+
+  function handleAddStudy() {
+    const hours = parseFloat(studyHoursInput)
+    if (!hours || hours <= 0) return
+    addStudySession(hours)
+    setPlanaura(getAuraData())
+    setTodayStudyHours(getTodayStudyHours())
+    setStudyHoursInput("")
   }
 
   const activeCourses = courses.filter((c) => c.workflow_state === "available")
@@ -288,6 +335,94 @@ export default function DashboardPage() {
 
         {/* Right column */}
         <div className="flex flex-col gap-6">
+          {/* Planaura card */}
+          {planaura && (() => {
+            const total = getTotalPoints(planaura)
+            const rank = getRank(total)
+            const next = getNextRank(total)
+            const prog = getProgressToNextRank(total)
+            const style = RANK_STYLES[rank.name] ?? RANK_STYLES["Delulu"]
+            const remaining = Math.max(0, 12 - todayStudyHours)
+            return (
+              <div
+                className="aura-hero-card rounded-xl border p-5"
+                style={{ boxShadow: style.glow }}
+              >
+                <div className="mb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" style={{ color: style.accent }} />
+                    <span className="text-sm font-medium">Planaura</span>
+                  </div>
+                  {planaura.streak > 0 && (
+                    <div className="flex items-center gap-1 text-xs text-orange-500">
+                      <Flame className="h-3 w-3" />
+                      {planaura.streak}d streak
+                    </div>
+                  )}
+                </div>
+                <div className="mb-1 flex items-center gap-2">
+                  <span className="text-2xl">{rank.emoji}</span>
+                  <div>
+                    <span
+                      className={`bg-gradient-to-r bg-clip-text text-base font-bold text-transparent ${style.gradient}`}
+                    >
+                      {rank.name}
+                    </span>
+                    <p className="text-xs text-muted-foreground">
+                      <span className="font-semibold" style={{ color: style.accent }}>
+                        {total}
+                      </span>{" "}
+                      planaura pts
+                    </p>
+                  </div>
+                </div>
+                {next && (
+                  <div className="mt-3 space-y-1">
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                      <span>{rank.name}</span>
+                      <span>{next.name}</span>
+                    </div>
+                    <Progress value={prog} className="h-1.5" />
+                    <p className="text-[10px] text-muted-foreground">
+                      {Math.round((next.min - total) * 10) / 10} pts to go
+                    </p>
+                  </div>
+                )}
+                <div className="mt-4 border-t pt-3">
+                  <label className="mb-1.5 flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                    <BookOpen className="h-3 w-3" />
+                    Log study session (+3 pts/hr, max 12hrs)
+                  </label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="number"
+                      min="0.5"
+                      max={remaining}
+                      step="0.5"
+                      placeholder={remaining > 0 ? `Hrs (${remaining} left)` : "Cap hit"}
+                      value={studyHoursInput}
+                      onChange={(e) => setStudyHoursInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddStudy()}
+                      disabled={remaining <= 0}
+                      className="h-7 flex-1 text-xs"
+                    />
+                    <Button
+                      size="xs"
+                      onClick={handleAddStudy}
+                      disabled={
+                        remaining <= 0 ||
+                        !studyHoursInput ||
+                        parseFloat(studyHoursInput) <= 0
+                      }
+                    >
+                      + Add
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )
+          })()}
+
           {/* Next day's schedule */}
           {nextClasses.length > 0 &&
             nextClasses.some((_, i) => !skippedIndices.has(i)) && (

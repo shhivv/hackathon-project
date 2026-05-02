@@ -11,6 +11,7 @@ import {
   Sun,
   Moon,
   Settings,
+  Sparkles,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
@@ -23,6 +24,7 @@ import { requestNotificationPermission } from "@/lib/assignments"
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/assignments", label: "Assignments", icon: ClipboardList },
+  { href: "/aura", label: "Planaura", icon: Sparkles },
   { href: "/settings", label: "Settings", icon: Settings },
 ]
 

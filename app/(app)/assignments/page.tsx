@@ -25,6 +25,7 @@ import {
   requestNotificationPermission,
   deleteCustomAssignment,
 } from "@/lib/assignments"
+import { completeAssignment, uncompleteAssignment } from "@/lib/auraStore"
 
 type TabFilter = "all" | "upcoming" | "overdue" | "completed"
 
@@ -55,12 +56,15 @@ export default function AssignmentsPage() {
         if (!ignore) {
           setAssignments(all)
           setLoading(false)
+          all.filter((a) => a.progress >= 100).forEach((a) => completeAssignment(a.id, a.title))
           requestNotificationPermission().then(() => checkDueReminders(all))
         }
       } catch {
         if (!ignore) {
-          setAssignments(sortByPriority(getCustomAssignments()))
+          const fallback = sortByPriority(getCustomAssignments())
+          setAssignments(fallback)
           setLoading(false)
+          fallback.filter((a) => a.progress >= 100).forEach((a) => completeAssignment(a.id, a.title))
         }
       }
     }
@@ -72,6 +76,7 @@ export default function AssignmentsPage() {
   }, [])
 
   function handleProgressChange(id: string, progress: number) {
+    const assignment = assignments.find((a) => a.id === id)
     setAssignments((prev) =>
       sortByPriority(prev.map((a) => (a.id === id ? { ...a, progress } : a)))
     )
@@ -82,6 +87,12 @@ export default function AssignmentsPage() {
       const custom = getCustomAssignments()
       const updated = custom.map((a) => (a.id === id ? { ...a, progress } : a))
       saveCustomAssignments(updated)
+    }
+
+    if (progress >= 100 && assignment) {
+      completeAssignment(id, assignment.title)
+    } else if (progress < 100) {
+      uncompleteAssignment(id)
     }
   }
 
