@@ -8,7 +8,8 @@
       "Bash(ls *)",
       "Bash(find \"C:\\\\\\\\Users\\\\\\\\hetpa\\\\\\\\onedrive\\\\\\\\desktop\\\\\\\\hackathon-project\\\\\\\\app\\\\\\\\api\" -type f -name \"*.ts\")",
       "Bash(bun run *)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")"
     ]
   }
 }
