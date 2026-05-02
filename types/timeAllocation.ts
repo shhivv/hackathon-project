@@ -1,5 +1,7 @@
+import type { WorkShift } from "./workSchedule"
+
 export interface TimeAllocation {
-  job: { title: string; hoursPerWeek: number } | null
+  jobs: WorkShift[]
   recreationHoursPerWeek: number
-  updatedAt: string // ISO
+  updatedAt: string
 }

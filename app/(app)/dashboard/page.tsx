@@ -12,6 +12,7 @@ import {
   Clock,
   MapPin,
   Wrench,
+  Info,
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
@@ -22,12 +23,15 @@ import {
   canvasToTracked,
   getCustomAssignments,
   sortByPriority,
+  sortByUrgency,
   formatDueDate,
   priorityConfig,
+  getUrgencyReason,
 } from "@/lib/assignments"
 import type { CanvasAssignment } from "@/lib/canvas"
 import { cn } from "@/lib/utils"
 import { YourWeekPanel } from "@/components/YourWeekPanel"
+import { SuggestedSchedule } from "@/components/SuggestedSchedule"
 import { getTimetable } from "@/lib/timetableStore"
 import {
   getEntriesForDay,
@@ -45,6 +49,7 @@ export default function DashboardPage() {
   const [loadingAssignments, setLoadingAssignments] = useState(true)
   const [tomorrowClasses, setTomorrowClasses] = useState<TimetableEntry[]>([])
   const [tomorrowLabel, setTomorrowLabel] = useState("")
+  const [expandedReason, setExpandedReason] = useState<string | null>(null)
 
   useEffect(() => {
     const timetable = getTimetable()
@@ -87,11 +92,13 @@ export default function DashboardPage() {
   }, [])
 
   const activeCourses = courses.filter((c) => c.workflow_state === "available")
-  const urgent = assignments.filter(
-    (a) =>
-      a.progress < 100 &&
-      (calculatePriority(a.dueAt) === "critical" ||
-        calculatePriority(a.dueAt) === "high")
+  const urgent = sortByUrgency(
+    assignments.filter(
+      (a) =>
+        a.progress < 100 &&
+        (calculatePriority(a.dueAt) === "critical" ||
+          calculatePriority(a.dueAt) === "high")
+    )
   )
   const completedCount = assignments.filter((a) => a.progress >= 100).length
   const overallProgress =
@@ -137,33 +144,64 @@ export default function DashboardPage() {
             {urgent.slice(0, 5).map((a) => {
               const priority = calculatePriority(a.dueAt)
               const config = priorityConfig[priority]
+              const reason = getUrgencyReason(
+                a.dueAt,
+                a.estimatedHours,
+                a.progress
+              )
+              const isReasonOpen = expandedReason === a.id
               return (
                 <div
                   key={a.id}
                   className={cn(
-                    "flex items-center justify-between rounded-lg border p-3",
+                    "rounded-lg border p-3",
                     config.border
                   )}
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">{a.title}</p>
-                    <div className="flex items-center gap-2">
-                      {a.courseName && (
-                        <span className="text-xs text-muted-foreground">
-                          {a.courseCode || a.courseName}
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{a.title}</p>
+                      <div className="flex items-center gap-2">
+                        {a.courseName && (
+                          <span className="text-xs text-muted-foreground">
+                            {a.courseCode || a.courseName}
+                          </span>
+                        )}
+                        <span
+                          className={cn("text-xs font-medium", config.color)}
+                        >
+                          {formatDueDate(a.dueAt)}
                         </span>
-                      )}
-                      <span className={cn("text-xs font-medium", config.color)}>
-                        {formatDueDate(a.dueAt)}
+                        {reason && (
+                          <button
+                            onClick={() =>
+                              setExpandedReason(isReasonOpen ? null : a.id)
+                            }
+                            className={cn(
+                              "flex items-center gap-0.5 text-xs underline-offset-2 hover:underline",
+                              isReasonOpen
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                            )}
+                          >
+                            <Info className="h-3 w-3" />
+                            Why?
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="ml-3 flex items-center gap-2">
+                      <Progress value={a.progress} className="h-1.5 w-16" />
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {a.progress}%
                       </span>
                     </div>
                   </div>
-                  <div className="ml-3 flex items-center gap-2">
-                    <Progress value={a.progress} className="h-1.5 w-16" />
-                    <span className="text-xs text-muted-foreground tabular-nums">
-                      {a.progress}%
-                    </span>
-                  </div>
+                  {isReasonOpen && reason && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {reason}
+                    </p>
+                  )}
                 </div>
               )
             })}
@@ -175,6 +213,11 @@ export default function DashboardPage() {
             </Button>
           </Link>
         </div>
+      )}
+
+      {/* Suggested study schedule */}
+      {!loadingAssignments && (
+        <SuggestedSchedule assignments={assignments} />
       )}
 
       {/* Tomorrow's schedule */}

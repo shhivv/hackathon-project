@@ -11,6 +11,7 @@ export interface TrackedAssignment {
   courseCode?: string
   dueAt: string | null
   progress: number
+  estimatedHours: number
   isCanvas: boolean
   canvasId?: number
   pointsPossible?: number
@@ -21,6 +22,83 @@ export interface TrackedAssignment {
 
 const PROGRESS_KEY = "assignment-progress"
 const CUSTOM_KEY = "assignment-custom"
+const ESTIMATED_KEY = "assignment-estimated"
+
+export function getEstimatedHoursOverrides(): Record<string, number> {
+  if (typeof window === "undefined") return {}
+  const stored = localStorage.getItem(ESTIMATED_KEY)
+  return stored ? JSON.parse(stored) : {}
+}
+
+export function setEstimatedHoursOverride(id: string, hours: number) {
+  const overrides = getEstimatedHoursOverrides()
+  overrides[id] = hours
+  localStorage.setItem(ESTIMATED_KEY, JSON.stringify(overrides))
+}
+
+export function calculateUrgency(
+  dueAt: string | null,
+  estimatedHours: number,
+  progress: number
+): number {
+  if (!dueAt) return 0
+  const now = new Date()
+  const due = new Date(dueAt)
+  const hoursUntilDue = (due.getTime() - now.getTime()) / (1000 * 60 * 60)
+  const workRemaining = estimatedHours * (1 - progress / 100)
+  if (hoursUntilDue <= 0) return 1000 + Math.abs(hoursUntilDue)
+  if (workRemaining <= 0) return 0
+  return workRemaining / hoursUntilDue
+}
+
+export function getUrgencyReason(
+  dueAt: string | null,
+  estimatedHours: number,
+  progress: number
+): string | null {
+  if (!dueAt) return null
+  const now = new Date()
+  const due = new Date(dueAt)
+  const hoursUntilDue = (due.getTime() - now.getTime()) / (1000 * 60 * 60)
+  const workRemaining =
+    Math.round(estimatedHours * (1 - progress / 100) * 10) / 10
+
+  if (hoursUntilDue <= 0) {
+    const abs = Math.abs(hoursUntilDue)
+    const overdueFmt =
+      abs >= 24 ? `${Math.floor(abs / 24)}d` : `${Math.floor(abs)}h`
+    return `Overdue by ${overdueFmt} — submit as soon as possible`
+  }
+
+  const dueStr =
+    hoursUntilDue < 24
+      ? `${Math.floor(hoursUntilDue)}h`
+      : `${Math.floor(hoursUntilDue / 24)} day${Math.floor(hoursUntilDue / 24) !== 1 ? "s" : ""}`
+
+  if (workRemaining > 0 && workRemaining >= hoursUntilDue * 0.8) {
+    return `Due in ${dueStr}, you've estimated ${workRemaining}h of work — don't wait`
+  }
+
+  if (hoursUntilDue < 24) {
+    return workRemaining > 0
+      ? `Due in ${dueStr} with ~${workRemaining}h of work remaining`
+      : `Due in ${dueStr} — almost no time left`
+  }
+
+  return workRemaining > 0
+    ? `Due in ${dueStr} with ~${workRemaining}h of work estimated`
+    : `Due in ${dueStr}`
+}
+
+export function sortByUrgency(
+  assignments: TrackedAssignment[]
+): TrackedAssignment[] {
+  return [...assignments].sort(
+    (a, b) =>
+      calculateUrgency(b.dueAt, b.estimatedHours, b.progress) -
+      calculateUrgency(a.dueAt, a.estimatedHours, a.progress)
+  )
+}
 
 export function calculatePriority(dueAt: string | null): Priority {
   if (!dueAt) return "none"
@@ -165,6 +243,7 @@ export function canvasToTracked(
     assignment.submission?.workflow_state === "graded" ||
     assignment.has_submitted_submissions
 
+  const estimatedOverrides = getEstimatedHoursOverrides()
   return {
     id: `canvas-${assignment.id}`,
     title: assignment.name,
@@ -174,6 +253,7 @@ export function canvasToTracked(
     courseCode: assignment.course_code,
     dueAt: assignment.due_at,
     progress: submitted ? 100 : (overrides[`canvas-${assignment.id}`] ?? 0),
+    estimatedHours: estimatedOverrides[`canvas-${assignment.id}`] ?? 2,
     isCanvas: true,
     canvasId: assignment.id,
     pointsPossible: assignment.points_possible ?? undefined,

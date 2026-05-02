@@ -8,6 +8,7 @@ import {
   ChevronUp,
   CheckCircle2,
   Clock,
+  Info,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,29 +21,57 @@ import {
   formatDueDate,
   formatFullDate,
   setProgressOverride,
+  setEstimatedHoursOverride,
+  getUrgencyReason,
+  saveCustomAssignments,
+  getCustomAssignments,
 } from "@/lib/assignments"
 
 interface AssignmentCardProps {
   assignment: TrackedAssignment
   onProgressChange: (id: string, progress: number) => void
+  onEstimatedHoursChange?: (id: string, hours: number) => void
   onDelete?: (id: string) => void
 }
 
 export function AssignmentCard({
   assignment,
   onProgressChange,
+  onEstimatedHoursChange,
   onDelete,
 }: AssignmentCardProps) {
   const [expanded, setExpanded] = useState(false)
+  const [localEstimatedHours, setLocalEstimatedHours] = useState(
+    assignment.estimatedHours
+  )
   const priority: Priority = calculatePriority(assignment.dueAt)
   const config = priorityConfig[priority]
   const isComplete = assignment.progress >= 100
+  const urgencyReason = getUrgencyReason(
+    assignment.dueAt,
+    localEstimatedHours,
+    assignment.progress
+  )
 
   function handleProgressClick(value: number) {
     if (assignment.isCanvas) {
       setProgressOverride(assignment.id, value)
     }
     onProgressChange(assignment.id, value)
+  }
+
+  function handleEstimatedHoursClick(hours: number) {
+    setLocalEstimatedHours(hours)
+    setEstimatedHoursOverride(assignment.id, hours)
+    if (!assignment.isCanvas) {
+      const custom = getCustomAssignments()
+      saveCustomAssignments(
+        custom.map((a) =>
+          a.id === assignment.id ? { ...a, estimatedHours: hours } : a
+        )
+      )
+    }
+    onEstimatedHoursChange?.(assignment.id, hours)
   }
 
   return (
@@ -172,8 +201,15 @@ export function AssignmentCard({
             </p>
           )}
 
+          {urgencyReason && !isComplete && (
+            <p className="mb-3 flex items-start gap-1.5 text-xs text-muted-foreground">
+              <Info className="mt-0.5 h-3 w-3 shrink-0" />
+              {urgencyReason}
+            </p>
+          )}
+
           {!assignment.submitted && (
-            <div className="flex flex-col gap-2">
+            <div className="mb-3 flex flex-col gap-2">
               <span className="text-xs text-muted-foreground">
                 Set progress:
               </span>
@@ -187,6 +223,32 @@ export function AssignmentCard({
                     className="tabular-nums"
                   >
                     {v}%
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!isComplete && (
+            <div className="flex flex-col gap-2">
+              <span className="text-xs text-muted-foreground">
+                Estimated hours:{" "}
+                <span className="font-medium text-foreground">
+                  {localEstimatedHours}h
+                </span>
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {[0.5, 1, 2, 3, 4, 6, 8].map((h) => (
+                  <Button
+                    key={h}
+                    variant={
+                      localEstimatedHours === h ? "default" : "outline"
+                    }
+                    size="xs"
+                    onClick={() => handleEstimatedHoursClick(h)}
+                    className="tabular-nums"
+                  >
+                    {h}h
                   </Button>
                 ))}
               </div>

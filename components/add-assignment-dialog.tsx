@@ -24,6 +24,7 @@ export function AddAssignmentDialog({ onAdd }: AddAssignmentDialogProps) {
   const [description, setDescription] = useState("")
   const [courseName, setCourseName] = useState("")
   const [dueAt, setDueAt] = useState("")
+  const [estimatedHours, setEstimatedHours] = useState("2")
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,6 +35,7 @@ export function AddAssignmentDialog({ onAdd }: AddAssignmentDialogProps) {
       description: description.trim() || undefined,
       courseName: courseName.trim() || undefined,
       dueAt: dueAt ? new Date(dueAt).toISOString() : null,
+      estimatedHours: Math.max(0.5, parseFloat(estimatedHours) || 2),
     })
 
     onAdd(assignment)
@@ -41,6 +43,7 @@ export function AddAssignmentDialog({ onAdd }: AddAssignmentDialogProps) {
     setDescription("")
     setCourseName("")
     setDueAt("")
+    setEstimatedHours("2")
     setOpen(false)
   }
 
@@ -92,6 +95,18 @@ export function AddAssignmentDialog({ onAdd }: AddAssignmentDialogProps) {
               type="datetime-local"
               value={dueAt}
               onChange={(e) => setDueAt(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="hours">Estimated hours</Label>
+            <Input
+              id="hours"
+              type="number"
+              min="0.5"
+              step="0.5"
+              value={estimatedHours}
+              onChange={(e) => setEstimatedHours(e.target.value)}
+              placeholder="2"
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">

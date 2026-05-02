@@ -1,8 +1,8 @@
 // Mounted in app/(app)/layout.tsx > AuthGate when !hasCompletedTimeAllocation().
-// Pass initialData={getTimeAllocation()} to pre-fill on re-entry via an Edit link.
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
@@ -13,7 +13,10 @@ import {
   getActivityLabel,
   getSubjectShortName,
 } from "@/lib/timetableParser"
+import { WorkShiftForm } from "@/components/WorkShiftForm"
 import type { TimeAllocation } from "@/types/timeAllocation"
+import type { WorkShift } from "@/types/workSchedule"
+import { shiftHoursPerWeek } from "@/types/workSchedule"
 import type { TimetableEntry } from "@/types/timetable"
 
 type Step = 1 | 2 | 3 | "done"
@@ -43,46 +46,40 @@ interface Props {
 }
 
 export function TimeAllocationFlow({ initialData, onComplete }: Props) {
-  const [step, setStep] = useState<Step>(1)
+  const [step, setStep]       = useState<Step>(1)
   const [fadeKey, setFadeKey] = useState(0)
 
-  // Step 1 state
-  const [hasJob, setHasJob] = useState<boolean | null>(() =>
-    initialData != null ? initialData.job !== null : null
+  // ── Step 1 state ──────────────────────────────────────────────
+  const [hasJob, setHasJob]           = useState<boolean | null>(() =>
+    initialData != null ? initialData.jobs.length > 0 : null
   )
-  const [jobTitle, setJobTitle] = useState(initialData?.job?.title ?? "")
-  const [jobHours, setJobHours] = useState(
-    initialData?.job?.hoursPerWeek != null
-      ? String(initialData.job.hoursPerWeek)
-      : ""
+  const [jobs, setJobs]               = useState<WorkShift[]>(
+    initialData?.jobs ?? []
   )
-  const [jobTitleError, setJobTitleError] = useState("")
-  const [jobHoursError, setJobHoursError] = useState("")
+  // null = list view; "new" = adding; WorkShift = editing existing
+  const [editingShift, setEditingShift] = useState<WorkShift | "new" | null>(null)
 
-  // Step 2 state
-  const [recHours, setRecHours] = useState(
+  // ── Step 2 state ──────────────────────────────────────────────
+  const [recHours, setRecHours]       = useState(
     initialData?.recreationHoursPerWeek != null
       ? String(initialData.recreationHoursPerWeek)
       : ""
   )
   const [recHoursError, setRecHoursError] = useState("")
 
-  // Step 3 state (timetable)
-  const [timetableText, setTimetableText] = useState("")
-  const [parsedEntries, setParsedEntries] = useState<TimetableEntry[]>([])
+  // ── Step 3 state (timetable) ──────────────────────────────────
+  const [timetableText, setTimetableText]   = useState("")
+  const [parsedEntries, setParsedEntries]   = useState<TimetableEntry[]>([])
   const [timetableError, setTimetableError] = useState("")
   const timetableRef = useRef<HTMLTextAreaElement>(null)
 
   // Done state
   const [savedData, setSavedData] = useState<TimeAllocation | null>(null)
 
-  // Focus refs — React 19: ref passes through ...props without forwardRef
-  const yesButtonRef = useRef<HTMLButtonElement>(null)
-  const jobTitleRef = useRef<HTMLInputElement>(null)
-  const recInputRef = useRef<HTMLInputElement>(null)
-  const looksGoodRef = useRef<HTMLButtonElement>(null)
+  const yesButtonRef  = useRef<HTMLButtonElement>(null)
+  const recInputRef   = useRef<HTMLInputElement>(null)
+  const looksGoodRef  = useRef<HTMLButtonElement>(null)
 
-  // Focus first interactive element when step changes
   useEffect(() => {
     if (step === 1) yesButtonRef.current?.focus()
     else if (step === 2) recInputRef.current?.focus()
@@ -90,65 +87,59 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     else if (step === "done") looksGoodRef.current?.focus()
   }, [step, fadeKey])
 
-  // When job toggle switches on, focus the title field
-  useEffect(() => {
-    if (hasJob === true) jobTitleRef.current?.focus()
-  }, [hasJob])
-
   function advance(next: Step) {
     setFadeKey((k) => k + 1)
     setStep(next)
   }
 
-  // ── Validation ───────────────────────────────────────────────
+  // ── Step 1 helpers ────────────────────────────────────────────
 
-  function validateStep1(): boolean {
-    if (hasJob !== true) return true
-    let ok = true
-
-    if (jobTitle.trim() === "") {
-      setJobTitleError("Add a short title.")
-      ok = false
-    }
-
-    const hrs = Number(jobHours)
-    if (jobHours === "" || hrs < 0) {
-      setJobHoursError(
-        hrs < 0 ? "Hours can't be negative." : "Enter the hours."
-      )
-      ok = false
-    }
-
-    return ok
+  function handleToggleYes() {
+    setHasJob(true)
+    if (jobs.length === 0) setEditingShift("new")
   }
+
+  function handleToggleNo() {
+    setHasJob(false)
+    setEditingShift(null)
+  }
+
+  function handleShiftSave(shift: WorkShift) {
+    setJobs((prev) => {
+      if (editingShift === "new") return [...prev, shift]
+      return prev.map((j) => (j.id === shift.id ? shift : j))
+    })
+    setEditingShift(null)
+  }
+
+  function handleShiftDelete(id: string) {
+    const next = jobs.filter((j) => j.id !== id)
+    setJobs(next)
+    if (next.length === 0) setEditingShift("new")
+  }
+
+  function handleStep1Continue() {
+    if (editingShift !== null) return
+    if (hasJob === false || (hasJob === true && jobs.length > 0)) advance(2)
+  }
+
+  const step1Enabled =
+    editingShift === null &&
+    (hasJob === false || (hasJob === true && jobs.length > 0))
+
+  // ── Step 2 helpers ────────────────────────────────────────────
 
   function validateStep2(): boolean {
     const hrs = Number(recHours)
-    if (recHours === "") {
-      setRecHoursError("Enter the hours.")
-      return false
-    }
-    if (hrs < 0) {
-      setRecHoursError("Hours can't be negative.")
-      return false
-    }
+    if (recHours === "") { setRecHoursError("Enter the hours."); return false }
+    if (hrs < 0)         { setRecHoursError("Hours can't be negative."); return false }
     return true
-  }
-
-  // ── Actions ──────────────────────────────────────────────────
-
-  function handleContinue() {
-    if (!validateStep1()) return
-    advance(2)
   }
 
   function handleSave() {
     if (!validateStep2()) return
     const data: TimeAllocation = {
-      job:
-        hasJob === true
-          ? { title: jobTitle.trim(), hoursPerWeek: Number(jobHours) }
-          : null,
+      jobs: hasJob === true ? jobs : [],
       recreationHoursPerWeek: Number(recHours),
       updatedAt: new Date().toISOString(),
     }
@@ -156,6 +147,8 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     setSavedData(data)
     advance(3)
   }
+
+  // ── Step 3 helpers ────────────────────────────────────────────
 
   function handleTimetableParse() {
     const entries = parseTimetable(timetableText)
@@ -178,20 +171,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     advance("done")
   }
 
-  // ── Derived ──────────────────────────────────────────────────
-
-  const step1Enabled =
-    hasJob === false ||
-    (hasJob === true && jobTitle.trim() !== "" && jobHours !== "")
-
-  const jobHoursWarning =
-    jobHours !== "" && !jobHoursError && Number(jobHours) > 60
-  const recHoursWarning =
-    recHours !== "" && !recHoursError && Number(recHours) > 60
-
-  // ── Done ──────────────────────────────────────────────────────
-
-  // ── Step 3 — Timetable ────────────────────────────────────
+  // ── Step 3 ────────────────────────────────────────────────────
 
   if (step === 3) {
     return (
@@ -213,8 +193,8 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
             >
               mytimetable.anu.edu.au/even/student
             </a>{" "}
-            — click <strong>Export</strong> then choose{" "}
-            <strong>Export as text</strong>, then paste it below.
+            — click <strong>Export</strong> then{" "}
+            <strong>Export as text</strong>, then paste below.
           </p>
         </div>
 
@@ -244,11 +224,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
               {timetableError && (
                 <p className="text-xs text-destructive">{timetableError}</p>
               )}
-              <p className="text-xs text-muted-foreground">
-                Tab-separated rows — include the header row or just the data.
-              </p>
             </div>
-
             <div className="flex items-center gap-4">
               <Button
                 onClick={handleTimetableParse}
@@ -290,11 +266,9 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
                 </div>
               ))}
             </div>
-
             <p className="text-xs text-muted-foreground">
               {parsedEntries.length} classes found.
             </p>
-
             <div className="flex items-center gap-4">
               <Button onClick={handleTimetableSave} className="flex-1">
                 Save timetable
@@ -320,17 +294,21 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
   if (step === "done" && savedData) {
     return (
       <Shell fadeKey={fadeKey}>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          You&apos;re set.
-        </h1>
+        <h1 className="text-2xl font-semibold tracking-tight">You&apos;re set.</h1>
 
         <div className="flex flex-col gap-2 rounded-lg bg-muted p-4">
-          <p className="text-sm">
-            <span className="text-muted-foreground">Job: </span>
-            {savedData.job
-              ? `${savedData.job.title}, ${savedData.job.hoursPerWeek} hrs/week`
-              : "No job"}
-          </p>
+          {savedData.jobs.length === 0 ? (
+            <p className="text-sm">
+              <span className="text-muted-foreground">Work: </span>No jobs added
+            </p>
+          ) : (
+            savedData.jobs.map((j) => (
+              <p key={j.id} className="text-sm">
+                <span className="text-muted-foreground">Work: </span>
+                {j.title} — {j.workDays.join(", ")} · {j.shiftStart}–{j.shiftEnd}
+              </p>
+            ))
+          )}
           <p className="text-sm">
             <span className="text-muted-foreground">Recreation: </span>
             {savedData.recreationHoursPerWeek} hrs/week
@@ -355,6 +333,8 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
   // ── Step 2 ────────────────────────────────────────────────────
 
   if (step === 2) {
+    const recHoursWarning =
+      recHours !== "" && !recHoursError && Number(recHours) > 60
     return (
       <Shell fadeKey={fadeKey}>
         <div className="flex flex-col gap-2">
@@ -366,8 +346,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           </h1>
           <p className="text-sm text-muted-foreground">
             Block out time for the things that keep you well — sport, hobbies,
-            friends, rest. No need to break it down. This is time we&apos;ll try
-            not to let study or work eat into.
+            friends, rest. We&apos;ll protect this time from study and work.
           </p>
         </div>
 
@@ -438,15 +417,16 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           Do you have a job?
         </h1>
         <p className="text-sm text-muted-foreground">
-          If you work part-time or casually, tell us roughly how much.
-          We&apos;ll factor it into your weekly plan.
+          Tell us your shift schedule and we&apos;ll block those hours out of
+          your study plan automatically.
         </p>
       </div>
 
+      {/* Yes / No toggle */}
       <div className="grid grid-cols-2 gap-2">
         <button
           ref={yesButtonRef}
-          onClick={() => setHasJob(true)}
+          onClick={handleToggleYes}
           className={cn(
             "rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
             hasJob === true
@@ -457,7 +437,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           Yes, I work
         </button>
         <button
-          onClick={() => setHasJob(false)}
+          onClick={handleToggleNo}
           className={cn(
             "rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
             hasJob === false
@@ -469,68 +449,71 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
         </button>
       </div>
 
+      {/* Work schedule builder */}
       {hasJob === true && (
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="job-title" className="text-sm font-medium">
-              What&apos;s the role?
-            </label>
-            <Input
-              id="job-title"
-              ref={jobTitleRef}
-              type="text"
-              value={jobTitle}
-              onChange={(e) => {
-                setJobTitle(e.target.value)
-                if (jobTitleError) setJobTitleError("")
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && step1Enabled) handleContinue()
-              }}
-              placeholder="e.g. Part-time barista, Casual tutor, Research assistant"
-              aria-invalid={!!jobTitleError || undefined}
-            />
-            {jobTitleError && (
-              <p className="text-xs text-destructive">{jobTitleError}</p>
-            )}
-          </div>
+          {/* Saved shift list */}
+          {jobs.length > 0 && editingShift === null && (
+            <div className="flex flex-col gap-2">
+              {jobs.map((shift) => (
+                <div
+                  key={shift.id}
+                  className="flex items-start justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2.5"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium">{shift.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {shift.workDays.join(", ")} · {shift.shiftStart}–
+                      {shift.shiftEnd}
+                      {shift.commuteMins > 0 &&
+                        ` · ${shift.commuteMins}min commute`}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {shiftHoursPerWeek(shift)} hrs/wk
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 gap-1">
+                    <button
+                      onClick={() => setEditingShift(shift)}
+                      className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      title="Edit"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleShiftDelete(shift.id)}
+                      className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      title="Remove"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() => setEditingShift("new")}
+                className="text-left text-xs text-primary underline underline-offset-2"
+              >
+                + Add another job
+              </button>
+            </div>
+          )}
 
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="job-hours" className="text-sm font-medium">
-              Hours per week (on average)
-            </label>
-            <Input
-              id="job-hours"
-              type="number"
-              min="0"
-              max="60"
-              step="0.5"
-              value={jobHours}
-              onChange={(e) => {
-                setJobHours(e.target.value)
-                if (jobHoursError) setJobHoursError("")
+          {/* Shift form */}
+          {editingShift !== null && (
+            <WorkShiftForm
+              initialShift={editingShift === "new" ? undefined : editingShift}
+              onSave={handleShiftSave}
+              onCancel={() => {
+                setEditingShift(null)
+                if (jobs.length === 0) setHasJob(null)
               }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && step1Enabled) handleContinue()
-              }}
-              aria-invalid={!!jobHoursError || undefined}
             />
-            {jobHoursError ? (
-              <p className="text-xs text-destructive">{jobHoursError}</p>
-            ) : jobHoursWarning ? (
-              <p className="text-xs text-muted-foreground">
-                That&apos;s a lot — are you sure?
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                An average is fine — it doesn&apos;t have to be exact.
-              </p>
-            )}
-          </div>
+          )}
         </div>
       )}
 
-      <Button onClick={handleContinue} disabled={!step1Enabled}>
+      <Button onClick={handleStep1Continue} disabled={!step1Enabled}>
         Continue
       </Button>
     </Shell>

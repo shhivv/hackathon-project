@@ -8,6 +8,7 @@ import {
   LogOut,
   GraduationCap,
   Bell,
+  Settings,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-provider"
@@ -19,6 +20,7 @@ import { requestNotificationPermission } from "@/lib/assignments"
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/assignments", label: "Assignments", icon: ClipboardList },
+  { href: "/settings", label: "Settings", icon: Settings },
 ]
 
 export function AppSidebar() {
