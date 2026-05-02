@@ -27,6 +27,7 @@ import {
 } from "@/lib/assignments"
 import type { CanvasAssignment } from "@/lib/canvas"
 import { cn } from "@/lib/utils"
+import { YourWeekPanel } from "@/components/YourWeekPanel"
 import { getTimetable } from "@/lib/timetableStore"
 import {
   getEntriesForDay,
@@ -108,6 +109,8 @@ export default function DashboardPage() {
           Here&apos;s your study overview
         </p>
       </div>
+
+      <YourWeekPanel />
 
       {/* Overall progress */}
       <div className="mb-6 rounded-xl border p-5">
