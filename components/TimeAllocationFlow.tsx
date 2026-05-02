@@ -202,9 +202,16 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
             Your timetable
           </h1>
           <p className="text-muted-foreground text-sm">
-            Paste your class timetable below so we can show your daily schedule
-            and remind you about workshop prep. You can copy it from your
-            university&apos;s enrollment system.
+            Export your timetable from{" "}
+            <a
+              href="https://mytimetable.anu.edu.au/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground underline underline-offset-2"
+            >
+              mytimetable.anu.edu.au
+            </a>
+            {" "}— click <strong>Export</strong> then choose <strong>Export as text</strong>, then paste it below.
           </p>
         </div>
 
