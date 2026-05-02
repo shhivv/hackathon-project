@@ -222,8 +222,8 @@ export function YourWeekPanel() {
                     className={cn(
                       "text-muted-foreground h-3 w-3 shrink-0 transition-opacity",
                       isOpen
-                        ? "opacity-40"
-                        : "opacity-0 group-hover:opacity-50",
+                        ? "opacity-60"
+                        : "opacity-40 group-hover:opacity-100",
                     )}
                   />
                 </button>

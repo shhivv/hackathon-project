@@ -8,6 +8,7 @@ import {
   ChevronUp,
   CheckCircle2,
   Clock,
+  Check,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -124,6 +125,15 @@ export function AssignmentCard({
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => handleProgressClick(isComplete ? 0 : 100)}
+            title={isComplete ? "Mark incomplete" : "Mark complete"}
+            className={isComplete ? "text-green-500 hover:text-green-600" : ""}
+          >
+            <Check className="h-3.5 w-3.5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon-xs"

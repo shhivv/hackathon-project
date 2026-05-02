@@ -8,7 +8,11 @@ import {
   LogOut,
   GraduationCap,
   Bell,
+  Sun,
+  Moon,
+  Settings,
 } from "lucide-react"
+import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
@@ -19,18 +23,20 @@ import { requestNotificationPermission } from "@/lib/assignments"
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/assignments", label: "Assignments", icon: ClipboardList },
+  { href: "/settings", label: "Settings", icon: Settings },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
   const { user, courses, logout } = useAuth()
+  const { resolvedTheme, setTheme } = useTheme()
 
   return (
     <aside className="flex h-svh w-64 shrink-0 flex-col border-r border-border bg-card">
       <div className="flex items-center gap-2 px-4 pt-5 pb-4">
         <GraduationCap className="h-6 w-6 text-primary" />
         <span className="text-sm font-semibold tracking-tight">
-          StudyTracker
+          Planora
         </span>
       </div>
 
@@ -100,6 +106,19 @@ export function AppSidebar() {
         >
           <Bell className="h-3.5 w-3.5" />
           Enable Notifications
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-1 w-full justify-start gap-2 text-xs text-muted-foreground"
+          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+        >
+          {resolvedTheme === "dark" ? (
+            <Sun className="h-3.5 w-3.5" />
+          ) : (
+            <Moon className="h-3.5 w-3.5" />
+          )}
+          {resolvedTheme === "dark" ? "Light mode" : "Dark mode"}
         </Button>
         <Separator className="mb-2" />
         <div className="flex items-center justify-between px-2">

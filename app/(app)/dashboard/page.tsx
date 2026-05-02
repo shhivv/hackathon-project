@@ -12,6 +12,7 @@ import {
   Clock,
   MapPin,
   Wrench,
+  Check,
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,8 @@ import {
   calculatePriority,
   canvasToTracked,
   getCustomAssignments,
+  saveCustomAssignments,
+  setProgressOverride,
   sortByPriority,
   formatDueDate,
   priorityConfig,
@@ -85,6 +88,20 @@ export default function DashboardPage() {
     }
     load()
   }, [])
+
+  function handleProgressChange(id: string, progress: number) {
+    setAssignments((prev) =>
+      sortByPriority(prev.map((a) => (a.id === id ? { ...a, progress } : a)))
+    )
+    if (id.startsWith("canvas-")) {
+      setProgressOverride(id, progress)
+    } else {
+      const custom = getCustomAssignments()
+      saveCustomAssignments(
+        custom.map((a) => (a.id === id ? { ...a, progress } : a))
+      )
+    }
+  }
 
   const activeCourses = courses.filter((c) => c.workflow_state === "available")
   const urgent = assignments.filter(
@@ -163,6 +180,13 @@ export default function DashboardPage() {
                     <span className="text-xs text-muted-foreground tabular-nums">
                       {a.progress}%
                     </span>
+                    <button
+                      onClick={() => handleProgressChange(a.id, 100)}
+                      title="Mark complete"
+                      className="text-muted-foreground hover:text-green-500 transition-colors"
+                    >
+                      <Check className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
               )
