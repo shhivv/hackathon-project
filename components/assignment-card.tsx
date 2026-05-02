@@ -1,0 +1,214 @@
+"use client"
+
+import { useState } from "react"
+import {
+  ExternalLink,
+  Trash2,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  Clock,
+} from "lucide-react"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Progress } from "@/components/ui/progress"
+import {
+  type TrackedAssignment,
+  type Priority,
+  calculatePriority,
+  priorityConfig,
+  formatDueDate,
+  formatFullDate,
+  setProgressOverride,
+} from "@/lib/assignments"
+
+interface AssignmentCardProps {
+  assignment: TrackedAssignment
+  onProgressChange: (id: string, progress: number) => void
+  onDelete?: (id: string) => void
+}
+
+export function AssignmentCard({
+  assignment,
+  onProgressChange,
+  onDelete,
+}: AssignmentCardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const priority: Priority = calculatePriority(assignment.dueAt)
+  const config = priorityConfig[priority]
+  const isComplete = assignment.progress >= 100
+
+  function handleProgressClick(value: number) {
+    if (assignment.isCanvas) {
+      setProgressOverride(assignment.id, value)
+    }
+    onProgressChange(assignment.id, value)
+  }
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border p-4 transition-all",
+        isComplete
+          ? "border-border bg-muted/30 opacity-70"
+          : config.border,
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-center gap-2">
+            {assignment.courseName && (
+              <span className="bg-primary/10 text-primary truncate rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                {assignment.courseCode || assignment.courseName}
+              </span>
+            )}
+            {!assignment.isCanvas && (
+              <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px] font-medium">
+                Custom
+              </span>
+            )}
+          </div>
+
+          <h3
+            className={cn(
+              "text-sm font-medium",
+              isComplete && "line-through",
+            )}
+          >
+            {assignment.title}
+          </h3>
+
+          <div className="mt-1 flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <Clock className="text-muted-foreground h-3 w-3" />
+              <span
+                className={cn(
+                  "text-xs",
+                  priority === "critical"
+                    ? "font-medium text-red-500"
+                    : "text-muted-foreground",
+                )}
+              >
+                {formatDueDate(assignment.dueAt)}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className={cn("h-1.5 w-1.5 rounded-full", config.dot)} />
+              <span className={cn("text-xs font-medium", config.color)}>
+                {config.label}
+              </span>
+            </div>
+            {assignment.pointsPossible && (
+              <span className="text-muted-foreground text-xs">
+                {assignment.pointsPossible} pts
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1">
+          {assignment.htmlUrl && (
+            <Button variant="ghost" size="icon-xs" asChild>
+              <a
+                href={assignment.htmlUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open in Canvas"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          )}
+          {!assignment.isCanvas && onDelete && (
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => onDelete(assignment.id)}
+              title="Delete"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? (
+              <ChevronUp className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronDown className="h-3.5 w-3.5" />
+            )}
+          </Button>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mt-3 flex items-center gap-3">
+        <Progress
+          value={assignment.progress}
+          className="h-2 flex-1"
+        />
+        <div className="flex items-center gap-1">
+          {isComplete ? (
+            <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
+          ) : null}
+          <span
+            className={cn(
+              "text-xs font-medium tabular-nums",
+              isComplete ? "text-green-500" : "text-muted-foreground",
+            )}
+          >
+            {assignment.progress}%
+          </span>
+        </div>
+      </div>
+
+      {/* Expanded section */}
+      {expanded && (
+        <div className="mt-3 border-t pt-3">
+          {assignment.description && (
+            <p className="text-muted-foreground mb-3 text-xs leading-relaxed">
+              {assignment.description.replace(/<[^>]*>/g, "").slice(0, 200)}
+              {(assignment.description.length ?? 0) > 200 ? "..." : ""}
+            </p>
+          )}
+
+          {assignment.dueAt && (
+            <p className="text-muted-foreground mb-3 text-xs">
+              {formatFullDate(assignment.dueAt)}
+            </p>
+          )}
+
+          {!assignment.submitted && (
+            <div className="flex flex-col gap-2">
+              <span className="text-muted-foreground text-xs">
+                Set progress:
+              </span>
+              <div className="flex gap-1.5">
+                {[0, 25, 50, 75, 100].map((v) => (
+                  <Button
+                    key={v}
+                    variant={assignment.progress === v ? "default" : "outline"}
+                    size="xs"
+                    onClick={() => handleProgressClick(v)}
+                    className="tabular-nums"
+                  >
+                    {v}%
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {assignment.submitted && (
+            <p className="flex items-center gap-1.5 text-xs text-green-500">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Submitted
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

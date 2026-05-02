@@ -1,8 +1,8 @@
 import { cookies } from "next/headers"
-import { NextRequest, NextResponse } from "next/server"
-import { fetchAssignments } from "@/lib/canvas"
+import { NextResponse } from "next/server"
+import { fetchCourses, fetchAssignments } from "@/lib/canvas"
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   const cookieStore = await cookies()
   const token = cookieStore.get("canvas_token")?.value
 
@@ -10,17 +10,24 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
   }
 
-  const courseId = req.nextUrl.searchParams.get("course_id")
-  if (!courseId) {
-    return NextResponse.json(
-      { error: "course_id is required" },
-      { status: 400 },
-    )
-  }
-
   try {
-    const assignments = await fetchAssignments(token, Number(courseId))
-    return NextResponse.json(assignments)
+    const courses = await fetchCourses(token)
+    const activeCourses = courses.filter(
+      (c) => c.workflow_state === "available",
+    )
+
+    const results = await Promise.all(
+      activeCourses.map(async (course) => {
+        const assignments = await fetchAssignments(token, course.id)
+        return assignments.map((a) => ({
+          ...a,
+          course_name: course.name,
+          course_code: course.course_code,
+        }))
+      }),
+    )
+
+    return NextResponse.json(results.flat())
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error"
     return NextResponse.json({ error: message }, { status: 502 })

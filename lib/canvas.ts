@@ -187,6 +187,16 @@ export function fetchAssignments(token: string, courseId: number) {
   )
 }
 
+export async function fetchUserProfile(
+  token: string,
+): Promise<{ name: string; avatar_url: string }> {
+  const profile = await canvasFetch<{ name: string; avatar_url: string }>(
+    "/api/v1/users/self/profile",
+    token,
+  )
+  return { name: profile.name, avatar_url: profile.avatar_url }
+}
+
 export function fetchModules(token: string, courseId: number) {
   return canvasFetch<CanvasModule[]>(
     `/api/v1/courses/${courseId}/modules`,
