@@ -90,3 +90,19 @@ export function parseDuration(duration: string): number {
   const match = duration.match(/([\d.]+)\s*hr/)
   return match ? parseFloat(match[1]) : 1
 }
+
+export function getNextClassDay(
+  entries: TimetableEntry[]
+): { date: Date; entries: TimetableEntry[] } | null {
+  const today = new Date()
+  for (let offset = 1; offset <= 7; offset++) {
+    const candidate = new Date(today)
+    candidate.setDate(today.getDate() + offset)
+    const dayName = getDayName(candidate)
+    const dayEntries = getEntriesForDay(entries, dayName)
+    if (dayEntries.length > 0) {
+      return { date: candidate, entries: dayEntries }
+    }
+  }
+  return null
+}
