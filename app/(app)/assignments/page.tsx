@@ -147,7 +147,7 @@ export default function AssignmentsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl p-6">
+    <div className="mx-auto max-w-3xl p-4 md:p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -160,7 +160,7 @@ export default function AssignmentsPage() {
       </div>
 
       {/* Stats */}
-      <div className="mb-6 grid grid-cols-4 gap-3">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           icon={<ClipboardList className="h-4 w-4" />}
           label="Total"

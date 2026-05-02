@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { Menu, GraduationCap } from "lucide-react"
 import { AuthProvider, useAuth } from "@/components/auth-provider"
 import { AppSidebar } from "@/components/app-sidebar"
 import { TimeAllocationFlow } from "@/components/TimeAllocationFlow"
@@ -11,8 +12,8 @@ import {
 
 function AuthGate({ children }: { children: React.ReactNode }) {
   const { loading } = useAuth()
-  // null = not yet checked (defer until after auth resolves to avoid SSR mismatch)
   const [allocationDone, setAllocationDone] = useState<boolean | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (!loading) {
@@ -42,8 +43,22 @@ function AuthGate({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-svh">
-      <AppSidebar />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <AppSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <header className="flex h-12 shrink-0 items-center gap-3 border-b px-4 lg:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="rounded-md p-1 text-muted-foreground hover:text-foreground"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-2">
+            <GraduationCap className="h-5 w-5 text-primary" />
+            <span className="text-sm font-semibold">Planora</span>
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto">{children}</main>
+      </div>
     </div>
   )
 }

@@ -10,7 +10,10 @@
       "Bash(bun run *)",
       "Skill(update-config)",
       "PowerShell(git add *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\hetpa\\\\onedrive\\\\desktop\\\\hackathon-project\" -Name | Where-Object { $_ -match \"^[^.]|^\\\\.\" -and $_ -notmatch \"node_modules|\\\\.next\" })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\hetpa\\\\onedrive\\\\desktop\\\\hackathon-project\" -Name | Where-Object { $_ -match \"^[^.]|^\\\\.\" -and $_ -notmatch \"node_modules|\\\\.next\" })",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(git add *)"
     ]
   }
 }

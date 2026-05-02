@@ -12,6 +12,7 @@ import {
   Moon,
   Settings,
   Sparkles,
+  X,
 } from "lucide-react"
 import { useTheme } from "next-themes"
 import { cn } from "@/lib/utils"
@@ -28,18 +29,36 @@ const navItems = [
   { href: "/settings", label: "Settings", icon: Settings },
 ]
 
-export function AppSidebar() {
+export function AppSidebar({ open, onClose }: { open?: boolean; onClose?: () => void }) {
   const pathname = usePathname()
   const { user, courses, logout } = useAuth()
   const { resolvedTheme, setTheme } = useTheme()
 
   return (
-    <aside className="flex h-svh w-64 shrink-0 flex-col border-r border-border bg-card">
-      <div className="flex items-center gap-2 px-4 pt-5 pb-4">
-        <GraduationCap className="h-6 w-6 text-primary" />
-        <span className="text-sm font-semibold tracking-tight">
-          Planora
-        </span>
+    <>
+      {open && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      <aside className={cn(
+        "fixed inset-y-0 left-0 z-50 flex w-64 shrink-0 flex-col border-r border-border bg-card transition-transform duration-200 lg:static lg:translate-x-0",
+        open ? "translate-x-0" : "-translate-x-full"
+      )}>
+      <div className="flex items-center justify-between px-4 pt-5 pb-4">
+        <div className="flex items-center gap-2">
+          <GraduationCap className="h-6 w-6 text-primary" />
+          <span className="text-sm font-semibold tracking-tight">
+            Planora
+          </span>
+        </div>
+        <button
+          onClick={onClose}
+          className="rounded-md p-1 text-muted-foreground hover:text-foreground lg:hidden"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       <Separator />
@@ -51,6 +70,7 @@ export function AppSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 active
@@ -138,5 +158,6 @@ export function AppSidebar() {
         </div>
       </div>
     </aside>
+    </>
   )
 }

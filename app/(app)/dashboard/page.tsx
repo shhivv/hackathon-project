@@ -211,7 +211,7 @@ export default function DashboardPage() {
       : 0
 
   return (
-    <div className="mx-auto max-w-6xl p-6">
+    <div className="mx-auto max-w-6xl p-4 md:p-6">
       <div className="mb-6">
         <h1 className="text-lg font-semibold">
           Welcome back{user?.name ? `, ${user.name}` : ""}
@@ -292,12 +292,12 @@ export default function DashboardPage() {
                         config.border
                       )}
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-medium">
                             {a.title}
                           </p>
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             {a.courseName && (
                               <span className="text-xs text-muted-foreground">
                                 {a.courseCode || a.courseName}
@@ -331,7 +331,7 @@ export default function DashboardPage() {
                             )}
                           </div>
                         </div>
-                        <div className="ml-3 flex items-center gap-2">
+                        <div className="flex items-center gap-2 sm:ml-3">
                           <Progress
                             value={a.progress}
                             className="h-1.5 w-16"
