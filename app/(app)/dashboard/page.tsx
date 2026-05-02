@@ -16,6 +16,7 @@ import {
   Check,
   Sparkles,
   Flame,
+  Megaphone,
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
@@ -72,6 +73,8 @@ export default function DashboardPage() {
   const [planaura, setPlanaura] = useState<AuraData | null>(null)
   const [studyHoursInput, setStudyHoursInput] = useState("")
   const [todayStudyHours, setTodayStudyHours] = useState(0)
+  const [announcementSummary, setAnnouncementSummary] = useState("")
+  const [loadingSummary, setLoadingSummary] = useState(true)
 
   useEffect(() => {
     const timetable = getTimetable()
@@ -112,6 +115,23 @@ export default function DashboardPage() {
   useEffect(() => {
     setPlanaura(getAuraData())
     setTodayStudyHours(getTodayStudyHours())
+  }, [])
+
+  useEffect(() => {
+    async function loadSummary() {
+      try {
+        const res = await fetch("/api/summarize")
+        if (res.ok) {
+          const data = await res.json()
+          setAnnouncementSummary(data.summary)
+        }
+      } catch {
+        setAnnouncementSummary("")
+      } finally {
+        setLoadingSummary(false)
+      }
+    }
+    loadSummary()
   }, [])
 
   useEffect(() => {
@@ -204,6 +224,33 @@ export default function DashboardPage() {
         {/* Left column */}
         <div className="flex flex-col gap-6">
           <YourWeekPanel />
+
+          {/* Announcement summary */}
+          <div className="rounded-xl border p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <Megaphone className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">Announcements</span>
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                AI Summary
+              </span>
+            </div>
+            {loadingSummary ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">
+                  Summarizing announcements...
+                </span>
+              </div>
+            ) : announcementSummary ? (
+              <div className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+                {announcementSummary}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                No announcements to summarize.
+              </p>
+            )}
+          </div>
 
           {/* Overall progress */}
           <div className="rounded-xl border p-5">
