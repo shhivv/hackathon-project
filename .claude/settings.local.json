@@ -9,7 +9,11 @@
       "Bash(find \"C:\\\\\\\\Users\\\\\\\\hetpa\\\\\\\\onedrive\\\\\\\\desktop\\\\\\\\hackathon-project\\\\\\\\app\\\\\\\\api\" -type f -name \"*.ts\")",
       "Bash(bun run *)",
       "Skill(update-config)",
+<<<<<<< HEAD
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\hetpa\\\\onedrive\\\\desktop\\\\hackathon-project\" -Name | Where-Object { $_ -match \"^[^.]|^\\\\.\" -and $_ -notmatch \"node_modules|\\\\.next\" })"
+=======
+      "Bash(grep -E \"\\\\.\\(tsx?|jsx?\\)$\")"
+>>>>>>> 16793cdf024fa2cbdd3bd8987c6644564aa1b8b1
     ]
   }
 }
