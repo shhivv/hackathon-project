@@ -7,9 +7,16 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { saveTimeAllocation } from "@/lib/timeAllocationStore"
+import { saveTimetable } from "@/lib/timetableStore"
+import {
+  parseTimetable,
+  getActivityLabel,
+  getSubjectShortName,
+} from "@/lib/timetableParser"
 import type { TimeAllocation } from "@/types/timeAllocation"
+import type { TimetableEntry } from "@/types/timetable"
 
-type Step = 1 | 2 | "done"
+type Step = 1 | 2 | 3 | "done"
 
 function Shell({
   fadeKey,
@@ -60,6 +67,12 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
   )
   const [recHoursError, setRecHoursError] = useState("")
 
+  // Step 3 state (timetable)
+  const [timetableText, setTimetableText] = useState("")
+  const [parsedEntries, setParsedEntries] = useState<TimetableEntry[]>([])
+  const [timetableError, setTimetableError] = useState("")
+  const timetableRef = useRef<HTMLTextAreaElement>(null)
+
   // Done state
   const [savedData, setSavedData] = useState<TimeAllocation | null>(null)
 
@@ -73,6 +86,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
   useEffect(() => {
     if (step === 1) yesButtonRef.current?.focus()
     else if (step === 2) recInputRef.current?.focus()
+    else if (step === 3) timetableRef.current?.focus()
     else if (step === "done") looksGoodRef.current?.focus()
   }, [step, fadeKey])
 
@@ -138,6 +152,27 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     }
     saveTimeAllocation(data)
     setSavedData(data)
+    advance(3)
+  }
+
+  function handleTimetableParse() {
+    const entries = parseTimetable(timetableText)
+    if (entries.length === 0) {
+      setTimetableError(
+        "No entries found. Paste the full table including all columns, separated by tabs.",
+      )
+      return
+    }
+    setTimetableError("")
+    setParsedEntries(entries)
+  }
+
+  function handleTimetableSave() {
+    saveTimetable(parsedEntries)
+    advance("done")
+  }
+
+  function handleTimetableSkip() {
     advance("done")
   }
 
@@ -151,6 +186,124 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     jobHours !== "" && !jobHoursError && Number(jobHours) > 60
   const recHoursWarning =
     recHours !== "" && !recHoursError && Number(recHours) > 60
+
+  // ── Done ──────────────────────────────────────────────────────
+
+  // ── Step 3 — Timetable ────────────────────────────────────
+
+  if (step === 3) {
+    return (
+      <Shell fadeKey={fadeKey}>
+        <div className="flex flex-col gap-2">
+          <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">
+            3 of 3
+          </p>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Your timetable
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Paste your class timetable below so we can show your daily schedule
+            and remind you about workshop prep. You can copy it from your
+            university&apos;s enrollment system.
+          </p>
+        </div>
+
+        {parsedEntries.length === 0 ? (
+          <>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="timetable-input" className="text-sm font-medium">
+                Paste timetable
+              </label>
+              <textarea
+                id="timetable-input"
+                ref={timetableRef}
+                value={timetableText}
+                onChange={(e) => {
+                  setTimetableText(e.target.value)
+                  if (timetableError) setTimetableError("")
+                }}
+                placeholder="Subject Code&#9;Description&#9;Group&#9;Activity&#9;Day&#9;Time&#9;..."
+                rows={6}
+                className={cn(
+                  "border-input bg-background placeholder:text-muted-foreground flex w-full rounded-md border px-3 py-2 text-sm",
+                  "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] focus-visible:outline-1",
+                  "resize-y font-mono text-xs leading-relaxed",
+                  timetableError && "border-destructive",
+                )}
+              />
+              {timetableError && (
+                <p className="text-destructive text-xs">{timetableError}</p>
+              )}
+              <p className="text-muted-foreground text-xs">
+                Tab-separated rows — include the header row or just the data.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <Button
+                onClick={handleTimetableParse}
+                disabled={timetableText.trim() === ""}
+                className="flex-1"
+              >
+                Parse timetable
+              </Button>
+              <button
+                onClick={handleTimetableSkip}
+                className="text-muted-foreground text-sm underline underline-offset-2"
+              >
+                Skip
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="bg-muted flex max-h-64 flex-col gap-1 overflow-y-auto rounded-lg p-3">
+              {parsedEntries.map((entry, i) => (
+                <div
+                  key={i}
+                  className="flex items-baseline justify-between gap-2 py-1"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">
+                      {getSubjectShortName(entry.description)}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {getActivityLabel(entry.group)} &middot; {entry.day}{" "}
+                      {entry.time} &middot; {entry.duration}
+                    </p>
+                  </div>
+                  <span className="text-muted-foreground shrink-0 text-xs">
+                    {entry.location && entry.location !== "-"
+                      ? entry.location.split("_")[0]
+                      : ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-muted-foreground text-xs">
+              {parsedEntries.length} classes found.
+            </p>
+
+            <div className="flex items-center gap-4">
+              <Button onClick={handleTimetableSave} className="flex-1">
+                Save timetable
+              </Button>
+              <button
+                onClick={() => {
+                  setParsedEntries([])
+                  setTimetableText("")
+                }}
+                className="text-muted-foreground text-sm underline underline-offset-2"
+              >
+                Re-paste
+              </button>
+            </div>
+          </>
+        )}
+      </Shell>
+    )
+  }
 
   // ── Done ──────────────────────────────────────────────────────
 
@@ -196,7 +349,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
       <Shell fadeKey={fadeKey}>
         <div className="flex flex-col gap-2">
           <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">
-            2 of 2
+            2 of 3
           </p>
           <h1 className="text-2xl font-semibold tracking-tight">
             Time for recreation
@@ -269,7 +422,7 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
     <Shell fadeKey={fadeKey}>
       <div className="flex flex-col gap-2">
         <p className="text-muted-foreground text-xs font-medium uppercase tracking-widest">
-          1 of 2
+          1 of 3
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">
           Do you have a job?

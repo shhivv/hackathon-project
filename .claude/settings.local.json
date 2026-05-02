@@ -3,7 +3,8 @@
     "allow": [
       "Bash(Get-ChildItem *)",
       "Bash(Select-Object FullName)",
-      "PowerShell(head *)"
+      "PowerShell(head *)",
+      "PowerShell(bun run *)"
     ]
   }
 }

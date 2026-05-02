@@ -8,6 +8,10 @@ import {
   AlertTriangle,
   ArrowRight,
   Loader2,
+  Calendar,
+  Clock,
+  MapPin,
+  Wrench,
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
@@ -23,11 +27,40 @@ import {
 } from "@/lib/assignments"
 import type { CanvasAssignment } from "@/lib/canvas"
 import { cn } from "@/lib/utils"
+import { getTimetable } from "@/lib/timetableStore"
+import {
+  getEntriesForDay,
+  getDayName,
+  getSubjectShortName,
+  getActivityLabel,
+  isWorkshopOrTutorial,
+  parseDuration,
+} from "@/lib/timetableParser"
+import type { TimetableEntry } from "@/types/timetable"
 
 export default function DashboardPage() {
   const { user, courses } = useAuth()
   const [assignments, setAssignments] = useState<TrackedAssignment[]>([])
   const [loadingAssignments, setLoadingAssignments] = useState(true)
+  const [tomorrowClasses, setTomorrowClasses] = useState<TimetableEntry[]>([])
+  const [tomorrowLabel, setTomorrowLabel] = useState("")
+
+  useEffect(() => {
+    const timetable = getTimetable()
+    if (timetable && timetable.length > 0) {
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      const dayName = getDayName(tomorrow)
+      setTomorrowLabel(
+        tomorrow.toLocaleDateString("en-AU", {
+          weekday: "long",
+          month: "short",
+          day: "numeric",
+        }),
+      )
+      setTomorrowClasses(getEntriesForDay(timetable, dayName))
+    }
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -138,6 +171,60 @@ export default function DashboardPage() {
               <ArrowRight className="h-3 w-3" />
             </Button>
           </Link>
+        </div>
+      )}
+
+      {/* Tomorrow's schedule */}
+      {tomorrowClasses.length > 0 && (
+        <div className="mb-6">
+          <div className="mb-3 flex items-center gap-2">
+            <Calendar className="text-primary h-4 w-4" />
+            <h2 className="text-sm font-medium">Tomorrow &mdash; {tomorrowLabel}</h2>
+          </div>
+          <div className="flex flex-col gap-2">
+            {tomorrowClasses.map((entry, i) => {
+              const needsPrep = isWorkshopOrTutorial(entry)
+              return (
+                <div
+                  key={i}
+                  className={cn(
+                    "rounded-lg border p-3",
+                    needsPrep && "border-amber-500/40 bg-amber-500/5",
+                  )}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">
+                        {getSubjectShortName(entry.description)}
+                      </p>
+                      <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {entry.time} &middot; {entry.duration}
+                        </span>
+                        <span className="bg-muted rounded px-1.5 py-0.5 text-xs font-medium">
+                          {getActivityLabel(entry.group)}
+                        </span>
+                        {entry.location && entry.location !== "-" && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {entry.location.split("_").slice(0, 2).join(" ")}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {needsPrep && (
+                    <div className="mt-2 flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                      <Wrench className="h-3 w-3" />
+                      Complete pre-req work before this{" "}
+                      {getActivityLabel(entry.group).toLowerCase()}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 
