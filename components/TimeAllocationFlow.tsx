@@ -204,12 +204,12 @@ export function TimeAllocationFlow({ initialData, onComplete }: Props) {
           <p className="text-muted-foreground text-sm">
             Export your timetable from{" "}
             <a
-              href="https://mytimetable.anu.edu.au/"
+              href="https://mytimetable.anu.edu.au/even/student"
               target="_blank"
               rel="noopener noreferrer"
               className="text-foreground underline underline-offset-2"
             >
-              mytimetable.anu.edu.au
+              mytimetable.anu.edu.au/even/student
             </a>
             {" "}— click <strong>Export</strong> then choose <strong>Export as text</strong>, then paste it below.
           </p>
