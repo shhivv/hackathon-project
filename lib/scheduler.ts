@@ -130,9 +130,10 @@ export function buildSchedule({
     dayDate.setDate(dayDate.getDate() + d)
     const dayName = getDayName(dayDate)
 
-    // Class busy slots
+    // Class busy slots (exclude workshops, tutorials, and labs)
+    const skipRe = /workshop|tutorial|lab/i
     const classBusy: Slot[] = timetable
-      .filter((e) => e.day === dayName)
+      .filter((e) => e.day === dayName && !skipRe.test(e.group) && !skipRe.test(e.description) && !e.group.toLowerCase().startsWith("com"))
       .map((e) => {
         const start = parseMin(e.time)
         return { start, end: start + Math.round(parseDuration(e.duration) * 60) }
@@ -185,8 +186,9 @@ export function buildSchedule({
 
   // ── Phase 2: study sessions (most urgent first) ──────────────────────────
 
+  const skipAssignmentRe = /workshop|tutorial|lab/i
   const eligible = [...assignments]
-    .filter((a) => a.progress < 100)
+    .filter((a) => a.progress < 100 && !skipAssignmentRe.test(a.title))
     .sort(
       (a, b) =>
         calculateUrgency(b.dueAt, b.estimatedHours ?? 2, b.progress) -

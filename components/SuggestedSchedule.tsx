@@ -80,7 +80,8 @@ export function SuggestedSchedule({ assignments }: Props) {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    setTimetable(getTimetable() ?? [])
+    const skipRe = /workshop|tutorial|lab/i
+    setTimetable((getTimetable() ?? []).filter((e) => !skipRe.test(e.group) && !skipRe.test(e.description) && !e.group.toLowerCase().startsWith("com")))
     setTimeAllocation(getTimeAllocation())
     setLoaded(true)
   }, [])

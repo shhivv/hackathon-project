@@ -92,7 +92,8 @@ export default function DashboardPage() {
             day: "numeric",
           })}`
         )
-        setNextClasses(result.entries)
+        const skipRe = /workshop|tutorial|lab/i
+        setNextClasses(result.entries.filter((e) => !skipRe.test(e.group) && !skipRe.test(e.description) && !e.group.toLowerCase().startsWith("com")))
 
         const dateKey = result.date.toISOString().slice(0, 10)
         setNextClassDateKey(dateKey)
